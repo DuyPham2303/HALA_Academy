@@ -6,12 +6,13 @@ Class là kiểu dữ liệu tự định nghĩa bỡi người dùng để qu�
 <p align = "center">
 <img src ="https://github.com/user-attachments/assets/bbb0c5c5-5b7e-4088-aa44-7cca28804df8"width = "650" height = "300">
 
-## 1.2 Đặc điểm
-Trong class các biến và hàm được định nghĩa là
+## 1.2 Đặc điểm 
 
-__a) property(thuộc tính) và method(phương thức)__
+__a) Các tên gọi__
 
-+ Class được quản lý dựa trên 3 phạm vi là 
++ **Method** : phuông thức (hàm)
++ **Properties** : thuộc tính (biến)
++ **object** : đối tượng (biến kiểu class)
 
 __b) Public, private, protected__
 
