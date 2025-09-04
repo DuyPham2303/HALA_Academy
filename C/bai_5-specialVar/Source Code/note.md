@@ -5,7 +5,9 @@
 - sử dụng nội dung trong 1 file -> include cả file (cách cơ bản)
     
     => không an toàn do copy toàn bộ source (ko có cơ chế bảo vệ nào)
-    `nhược điểm:`
+    
+    **nhược điểm:**
+        
         + tăng kích thước mã nguồn, không tối ưu (compiler biên dịch những đoạn mã ko cần thiết)
         + lỗi khai báo nhiều lần (include nhiều lần)
 ## Sử dụng
