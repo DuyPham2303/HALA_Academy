@@ -3,7 +3,7 @@
 
 #define CHECK_GPIO_Pin(condition,error) assert(condition && #error)
 
-#define GPIO_BASE_ADDR  ((volatile uint32_t *)0x50000000UL) //định nghĩa địa chỉ base của GPIO 
+#define GPIO_BASE_ADDR  ((volatile uint32_t *)0x2000000UL) //định nghĩa địa chỉ base của GPIO 
 
 void GPIO_Config(uint8_t pinNumber) {
     //chỉ cho phép số chân GPIO từ 0 đến 15

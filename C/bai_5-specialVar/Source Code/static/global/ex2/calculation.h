@@ -5,25 +5,23 @@
 #include <math.h>
 #include <stdbool.h>
 
-typedef struct
-{
-    double a,b,c;
-    double x1;
-    double x2;
-    bool has_result;    // 1: có nghiệm, 0: vô nghiệm
-} Equation;
+typedef enum{
+    VO_NGHIEM,
+    NGHIEM_KEP,
+    HAI_NGHIEM
+}Type;
 
 // Nhập hệ số
-void input_coefficients(Equation *eq);
+void input_coefficients(double* a,double* b,double* c);
 
 // Tính delta
-static double calculate_delta(double a, double b, double c);
+double calculate_delta(double a, double b, double c);
 
 // Giải phương trình
-static void solve(Equation *eq);
+Type solve(double a,double b,double c,double delta,double* x1,double* x2);
 
 // Hiển thị kết quả
-void display_result(Equation eq);
+void display_result(double a,double b,double c,double delta);
 
 #endif
 

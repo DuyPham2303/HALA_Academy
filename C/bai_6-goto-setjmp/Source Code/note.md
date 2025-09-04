@@ -39,20 +39,20 @@
     - là gì ? 
     - So sánh với goto 
         + phiên bãn nâng cấp (nhảy giữa nhiều hàm)
-## cách dùng
-    - macro define 
-    - chứa jmp_buf : lưu trữ vị trí thực thi hiện tại
-        =>  lấy giá trị địa chỉ trong PC 
-    - chứa long_jmp : cho phép nhảy về ví trị set_jmp 
+## cách dùng 
+    - set_jmp(jmp_buff env) : lưu trữ vị trí thực thi hiện tại -> liên hệ PC (thực thi dòng lệnh hiện tại bằng cách đọc ra địa chỉ)
+        + env chứa địa chỉ của dòng hiện tại 
+    - long_jmp(jmp_buf env,int value) : cho phép nhảy về ví trị set_jmp dựa trên jmp_buf
+        + value : giá trị sẽ trả về cho set_jmp
 ## Ví dụ cơ bản
     - mô tả cách chạy (minh họa ưu điểm so với goto)
 ## Ứng dụng xử lý exception handling
-    - Mô tả từng lỗi 
+    - Mô tả từng lỗi exception 
     - giới thiệu co chế xử lý ngoại lệ 
         + try : định nghĩa 1 lỗi
         + catch : bắt lỗi
         + throw : ném ra lỗi 
-        => C không hỗ trợ (tự định nghĩa thông qua setjmp,longjmp)
+        =>C++ tích hợp sẵn -> C không hỗ trợ (tự định nghĩa thông qua setjmp,longjmp)
     - Viết hàm xử lý lỗi chia 0 (dùng if - else)
         + viết lại bằng try,catch,throw
 

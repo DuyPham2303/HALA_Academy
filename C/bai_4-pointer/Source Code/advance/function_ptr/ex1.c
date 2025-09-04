@@ -42,7 +42,7 @@ int main(){
     operator(34, 12);
     // cach 2
     
-   int a = 23, b = 2;
+    int a = 23, b = 2;
     Operator(Tong, a, b);
     Operator(Hieu, a, b);
     Operator(Tich, a, b);

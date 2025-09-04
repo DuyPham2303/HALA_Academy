@@ -1,20 +1,15 @@
-#include "motor.h"
-
+#include "stdio.h"
+#include "calculation.h"
 int main(){
-    //khởi tạo đối tượng chửa các con trỏ hàm
-    MotorController motor;
-    
-    //khởi tạo các con trỏ hàm 
-    init_motor(&motor);
+    double a,b,c,delta;
+    double x1,x2;
+    while(1){
+        input_coefficients(&a,&b,&c);
 
-    PIN pin = 2;
-    int speed = 222;
+        delta = calculate_delta(a,b,c);
+        
+        Type result = solve(a,b,c,delta,&x1,&x2);
 
-    //gọi hàm thông qua con trỏ hàm
-    motor.changeSpeed(pin,speed);
-    motor.start(pin);
-    motor.stop(pin);
-
-  
-    return 0;
+        display_result(a,b,c,delta);
+    }
 }

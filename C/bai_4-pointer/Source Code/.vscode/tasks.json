@@ -14,8 +14,7 @@
                 "-std=c17",
                 "${file}",
                 "-o",
-                //"${fileDirname}\\${fileBasenameNoExtension}.exe"
-                "${fileDirname}/run.exe",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"

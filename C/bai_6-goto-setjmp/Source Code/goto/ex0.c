@@ -1,12 +1,14 @@
 #include <stdio.h>
 
-//label1:
+/* 
+    label1:
 
+    goto lable1;
 
-//goto label2;
-
-
-//label2:
+    label:
+        //cau lenh 9
+        //cau lenh 10
+*/
 
 //Program counter : PC
 
