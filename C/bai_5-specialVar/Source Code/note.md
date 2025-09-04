@@ -3,8 +3,11 @@
 # EXTERN
 ## Đặt vấn đề
 - sử dụng nội dung trong 1 file -> include cả file (cách cơ bản)
+    
     => không an toàn do copy toàn bộ source (ko có cơ chế bảo vệ nào)
+    
     => nhược điểm:
+
         + tăng kích thước mã nguồn, không tối ưu (compiler biên dịch những đoạn mã ko cần thiết)
         + lỗi khai báo nhiều lần (include nhiều lần)
 ## Sử dụng
@@ -47,9 +50,8 @@
     - cách thức biến lưu trữ,xử lý trên máy tính 
         => ALU -> register -> RAM
     - khai báo Register ? 
-        -> xử lý nhanh chóng đối với biến cần xử lý tính toán phức tạp
+        => xử lý nhanh chóng đối với biến cần xử lý tính toán phức tạp
     => Register chỉ định biến lưu trên Register thay vì RAM -> tăng tốc độ truy cập 
-    - Ứng dụng tính toán tốc độ động co 
 ## ví dụ 
     - giải thích hàm clock()
    `Nhược điểm`
