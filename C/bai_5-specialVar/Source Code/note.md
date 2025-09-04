@@ -5,9 +5,7 @@
 - sử dụng nội dung trong 1 file -> include cả file (cách cơ bản)
     
     => không an toàn do copy toàn bộ source (ko có cơ chế bảo vệ nào)
-    
-    => nhược điểm:
-
+    `nhược điểm:`
         + tăng kích thước mã nguồn, không tối ưu (compiler biên dịch những đoạn mã ko cần thiết)
         + lỗi khai báo nhiều lần (include nhiều lần)
 ## Sử dụng
@@ -17,7 +15,7 @@
     - chỉ được khai báo ko được phép định nghĩa lại
     - sử dụng cho biến/hàm toàn cục
 - share cho nhiều file -> khai báo extern trong .h
--  so sánh hàm có/không extern => hàm toàn cục mặc định (ko cần extern)
+- so sánh hàm có/không extern -> hàm toàn cục mặc định (ko cần extern)
 
 # STATIC 
 ## Local
