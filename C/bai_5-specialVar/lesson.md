@@ -17,7 +17,7 @@ Từ khòa extern cho phép 1 tài nguyên chung được chia sẻ và sử d�
     return 0;
   }
 ```
-## 1.4 Gọi 1 hàm trong file khác
+## 1.3 Gọi 1 hàm trong file khác
 Đối với việc gọi 1 hàm nào đó, từ 1 file khác thì ta không cần sử dụng từ khóa static mà sử dụng trực tiếp trong file main hiện tại
 + file output.c
 ```bash
@@ -37,6 +37,62 @@ Từ khòa extern cho phép 1 tài nguyên chung được chia sẻ và sử d�
     return 0;
  }
 ```
+## 1.4 So sánh cách cập nhật giá trị thông qua extern,truyền con trỏ, và return
+
+### a) Ngữ cảnh áp dụng extern
+
+- chia sẻ dữ liệu giữa nhiều file nguồn cùng chức năng, ví dụ module read dùng để cập nhật ghi dữ liệu cảm biến, và extern cho các module khác
+để đọc và xử lý. Có thể dùng gettter/setter để bảo vệ quyền đọc/ghi trực tiếp tránh việc biến bị thay đổi ngoài mong muốn
+- Phù hợp :
+    => ứng dụng nhỏ, ít chức năng
+    => dũ liệu nhỏ, ít thay đổi
+    => dữ liệu có thể chấp nhận chia sẻ trực tiếp
+
+**Ưu điểm**
++ đơn giản, dễ code
++ chia sẻ giữa nhiều module dẽ dàng
+**Nhược điểm**
++ dữ liệu dễ bị ghi đè ngoài ý muốn
++ dễ bị xung đột khi nhiều module thực hiện ghi giá trị
+
+### b) Ngữ cảnh áp dụng truyền con trỏ vào hàm
+- Cần đọc/ghi dữ liệu gián tiếp trong 1 hệ thống lớn thông qua các API trung gian, mà không cần quan tâm đển quá trình xử lý chi tiết. Phù hợp với các dự án lớn, phân chi các lớp cụ thể. __(yêu cầu tính trừu tượng)__
+- Phù hợp cập nhật dữ liệu dạng struct, kết hợp return trạng thái xử lý kiểu bool
+
+**Ưu điểm**
++ Không cần hiểu sâu về quy trình xử lý dữ liệu 
+
+**Nhược điểm**
++ Cần xác định param truyền vào hàm để xử lý,
+
+### c) Ngữ cảnh áp dụng return giá trị trực tiếp
+- Cần xử lý và trả về giá trị đơn giản, đọc lẻ tẻ
+
+**Ưu điểm**
+
++ APi dễ đọc, đọc nhanh trong ứng dụng xử lý theo thời gian thực
+
+**Nhược điểm**
+
+= Không phù hợp cho dữ liệu phúc tạp kiểu struct nhiều field
+
+`VÍ DỤ PHÂN LOẠI`
+
+
+```bash
+// Dành cho dữ liệu nhỏ
+int16_t Temp_ReadNow(void); 
+
+// Dành cho dữ liệu phức tạp
+Std_ReturnType Sensor_Read(SensorId id, SensorData* out);
+
+// Hằng số dùng cho quá trình tính toán
+extern const double pi;  // ok
+```
+
+
+
+- 
 # 2. Từ khóa static 
 ## 2.1 biến static được khai báo local
 1 biến sẽ được cấp phát vùng nhớ tồn tại xuyên suốt thời gian chạy chương trình và có phạm vi sử dụng bên trong 1 hàm
@@ -144,6 +200,7 @@ hàm trên sẽ đo thời gian thực thi của vòng lặp đối với biến
 + __Ngắt__: bién được cập nhật khi có tín hiệu tác động đến từ trong/ngoài vi điều khiển
 
 + __Đa luồng:__ biến được truy cập hoặc thay đổi bời 1 luòng khác
+
 ## 4.2 Bản chất
 Từ khóa volatile đảm bảo rằng mỗi lần truy cập, giá trị mới nhất của biến được lấy trực tiếp từ RAM, thay vì dùng giá trị lưu trên thahh ghi
 ## 4.3 Tối ưu hóa chương trình là gì ? cách ngăn chặn ?
@@ -199,7 +256,7 @@ int main() {
 __LƯU Ýl__ lý do phải thêm volatile khi khai báo biến i trong vòng lặp for là vì 
 
 + Nếu không có volatile: compiler sẽ nhận ra rằng vòng for chỉ chạy 1 số lần nhất định và không làm gì bên trong vòng lặp, do đó nó có thể loại bỏ for
-+ Nếu có volatile: compiler sẽ bị buộc phải luôn luông thực hiện thực thi for. Volatile sẽ yêu cầu compiler đọc.ghi giá trị của i từ RAM trong mỗi lần lặp
++ Nếu có volatile: compiler sẽ bị buộc phải luôn luôn thực hiện thực thi for. Volatile sẽ yêu cầu compiler đọc.ghi giá trị của i từ RAM trong mỗi lần lặp
 
 # 5. So sánh các từ khóa
 
