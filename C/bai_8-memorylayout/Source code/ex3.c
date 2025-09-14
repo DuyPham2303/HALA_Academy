@@ -14,11 +14,14 @@ int test(int a, int b) //
     int c = a + b;
     int d = c + 10;
 
-    const int e = 12;
+    const int e = 12;   //stack
 
+    static int f = 10;  //.data
+
+    //p -> stack/bss/data
     int* p = (int*)&e;
 
-    *p = 12;
+    *p = 12;    //thay đổi const thông qua con trỏ
 
     printf("e = %d",e);
 

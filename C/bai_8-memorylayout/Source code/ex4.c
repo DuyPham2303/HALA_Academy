@@ -21,6 +21,11 @@ int main(){
 
     ptr = (int*)realloc(ptr,new_size*sizeof(int));
 
+    if(ptr == NULL){
+        printf("không đủ vùng nhớ cấp phát");
+        return 1;
+    }
+    
     for(int i = 0 ; i < new_size ; i++){
         ptr[i] = i;
         printf("%d = %d\taddress: %p\n",i,ptr[i],&ptr[i]);

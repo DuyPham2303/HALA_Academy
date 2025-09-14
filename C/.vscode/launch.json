@@ -12,7 +12,7 @@
       "cwd":  "${workspaceFolder}",
       "externalConsole": false,
       "MIMode": "gdb",
-      "miDebuggerPath": "C:\\MinGW\\msys64\\mingw64\\bin\\gdb.exe",
+      "miDebuggerPath": "C:\\mingw-w64\\mingw32\\bin\\gcc.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing",

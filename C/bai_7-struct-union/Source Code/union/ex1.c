@@ -1,20 +1,18 @@
 #include <stdio.h>
 #include <stdint.h>
-union Data
-{
-    // cấp phát 16 byte: 0x00 - 0x0f
-    uint8_t a;     // 1 byte + 15 padding
-    uint16_t b[5]; // 10 byte + 6 padding
-    uint32_t c;    // 4 byte + 12 padding
-    double d;      // 8 byte + 8 padding
-};
+//lưu trữ member là array ?
 
-int main()
-{
-    sizeof(union Data);
-    union Data dt;
-    printf("address of a: %p\n", &dt.a);
-    printf("address of b: %p\n", &dt.b);
-    printf("address of c: %p\n", &dt.c);
-    printf("address of d: %p\n", &dt.d);
+typedef union{
+    //data alignment -> cấp phát 4 byte 1 lần (do c lớn nhất)
+    
+    //lần 1 : 4 byte (arr[0] - arr[3])
+    //lần 2 : 4 byte (arr[4] - arr[6]) + 1 padding 
+    //vùng nhớ mới : 8 byte
+    uint8_t a[7]; 
+    uint16_t b; //1 byte + 7 padding 
+    uint32_t c; //4 byte + 4 padding
+}data;
+
+int main(){
+    sizeof(data); //8 byte -> phụ thuộc a và padding của nó
 }

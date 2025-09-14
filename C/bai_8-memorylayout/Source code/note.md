@@ -2,17 +2,20 @@
     => Khác biệt chương trình lưu trữ trên máy tính và MCU
         -> nơi lưu trữ chương trình
         -> file thực thi đầu ra
+        -> Khi run program : dữ liệu sẽ xử lý như thế nào 
     => gồm 5 phân vùng 
     => compiler trên macOS và window khác gì nhau
 # TEXT
-    - lưu mã lệnh chương trình (trên MCU là flash), chuỗi hằng số
-    - chỉ đọc/ko cho phép ghi
+    - lưu mã lệnh thực thi chương trình (mã hóa ở chuỗi nhị phân)
+    - chuỗi hằng - string literal (MacOS)
+    - Read Only (không write)
 # BSS
     - lưu biến global,static bằng 0/chưa khởi tạo giá trị, const (chỉ dọc)
     - đọc và ghi
     - vùng nhớ tồn tại đến khi chương trình kết thúc
 # DATA
     - lưu biến global,static đã khởi tạo giá trị const (chỉ dọc)
+    - chuỗi hằng - string literal __(.ro data trên Window)__
     - đọc và ghi
     - vùng nhớ tồn tại đến khi chương trình kết thúc
 # STACK

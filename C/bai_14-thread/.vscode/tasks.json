@@ -2,19 +2,15 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "",
+            "label": "Build C",
             "command": "C:\\MinGW\\msys64\\mingw64\\bin\\gcc.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "-O0",
-                //"-O3",
-                //"${file}",
-                "main.c",
-                "list.c",
+                "${fileBasename}",
                 "-o",
-                //"${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "main.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
             ],
             "options": {
                 "cwd": "${fileDirname}"

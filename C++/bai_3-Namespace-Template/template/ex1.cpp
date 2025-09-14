@@ -5,7 +5,7 @@ using namespace std;
 template <typename type1, typename type2>
 class Sensor
 {
-private:
+private:    
     type1 value1;
     type2 value2;
 public:

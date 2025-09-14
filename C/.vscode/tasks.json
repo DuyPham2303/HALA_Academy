@@ -3,7 +3,7 @@
         {
             "type": "cppbuild",
             "label": "Build-C-program",
-            "command": "C:\\MinGW\\msys64\\mingw64\\bin\\gcc.exe",
+            "command": "C:\\mingw-w64\\mingw32\\bin\\gcc.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -22,7 +22,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "compiler: C:\\MinGW\\msys64\\mingw64\\bin\\gcc.exe"
+            "detail": "compiler: C:\\mingw-w64\\mingw32\\bin\\gcc.exe"
         },
         {
             "label": "Open Terminal at Current File",

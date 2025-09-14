@@ -3,14 +3,15 @@
     "tasks": [
         {
 			"type": "cppbuild",
-			"label": "Build with GCC 12.1.0",
+			"label": "Build-Cpp-program",
 			"command": "C:\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-fdiagnostics-color=always",
                 "-std=c++17",
                 "-pthread",
 				"-g",
-                "*.cpp",
+                "${file}",  /* build tệp đang mở */
+                //"*.cpp", /* build tất cả tệp .cpp trong current folder */
 				"-o",
 				"${fileDirname}\\${fileBasenameNoExtension}.exe"
 			],
@@ -22,6 +23,25 @@
 			],
 			"group": "build",
 			"detail": "compiler: C:\\mingw64\\bin\\g++.exe"
-		}
+		},
+        {
+            "label": "Open Terminal at Current File",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/Script/cd_to_current_file.sh",
+                "${file}"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
     ]
 }

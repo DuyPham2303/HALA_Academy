@@ -1,7 +1,10 @@
 #include <iostream>
 using namespace std;
-/*structure of namespace*/
 /*
++ Namepspace : từ khóa định nghỉa phạm vi truy cập của nhiều đối tượng giống nhau mà ta muốn tách biệt để phân biệt, và truy cập 
+               gián tiếp thông qua tên phạm vi đã định nghĩa 
+               => giống như 1 chiếc hộp để đóng gói các đối tượng 
++ CẤU TRÚC KHAI BÁO
 namespace name_of_namespace{
     //var
     //function
