@@ -7,13 +7,14 @@
 			"command": "C:\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-fdiagnostics-color=always",
-                "-std=c++17",
+                "-std=c++23",
                 "-pthread",
 				"-g",
                 "${file}",  /* build tệp đang mở */
                 //"*.cpp", /* build tất cả tệp .cpp trong current folder */
 				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe"
+				//"${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "main.exe"
 			],
 			"options": {
 				"cwd": "${fileDirname}"
