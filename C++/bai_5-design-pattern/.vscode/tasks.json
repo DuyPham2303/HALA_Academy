@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+			"type": "cppbuild",
+			"label": "Build-Cpp-program",
+			"command": "C:\\mingw64\\bin\\g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+                "-std=c++23",
+                "-pthread",
+				"-g",
+                "${file}",  /* build tệp đang mở */
+                //"*.cpp", /* build tất cả tệp .cpp trong current folder */
+				"-o",
+				//"${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "main.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: C:\\mingw64\\bin\\g++.exe"
+		},
+        {
+            "label": "Open Terminal at Current File",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/Script/cd_to_current_file.sh",
+                "${file}"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}
