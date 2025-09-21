@@ -8,11 +8,13 @@ typedef enum{
     teacher
 }PersonType;
 
+//Product : mô tả đối tượng tổng quát -> kế thừa bởi lớp con cụ thể
 class Person{
     private:
         string name;
         int age;
     public:
+        //hàm khởi tạo các thuộc tính chung cho các lớp con 
         Person(string name,int age) : name(name),age(age){}
         virtual void printInfo(){
             cout << "name:" << name << endl;
@@ -20,6 +22,7 @@ class Person{
         }
 };
 
+//Concrete Product : lớp con cụ thể
 class Student : public Person{
     private:
         float gpa;
@@ -36,7 +39,7 @@ class Student : public Person{
                  << "gpa:" << gpa << endl;
         }
 };
-
+//Concrete Product : lớp con cụ thể
 class Teacher : public Person{
      private:
         string subject;
@@ -53,8 +56,11 @@ class Teacher : public Person{
                  << "ID:" << ID << endl;
         }
 };
+//Creational class : lớp khởi tạo tổng quát cho class cụ thể dựa trên tham số đầu vào
 class Factory{
     public:
+        //truy cập thông qua tên class, mà không cần khởi tạo Instance -
+        //-> chỉ dùng với mục đích khởi tạo Instance của class khác (ko cần cấp phát memory để sữ dụng)
         static Person* createPerson(PersonType type){
             if(type == student){
                 return new Student("Duy Pham",23,"Co dien tu",3.4);
