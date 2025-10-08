@@ -36,7 +36,7 @@
             - kế thừa bởi class con
             - chứa hành vi được class con triển khai cụ thể
         **concrete product**
-            - class con cụ thể sẽ triển khai hành vi của Porduct
+            - class con cụ thể sẽ triển khai hành vi của Product
             - được khởi tạo gián tiếp qua Concrete creator
         **Creator (Interface)**
             - Interface chứa method khởi tạo các lớp con thông qua việc gọi Product

@@ -39,13 +39,13 @@ using namespace std;
 // static method/properties
 /*
     + static properies
-    - thuộc tính chia sẻ chung address giữa các object class
-    - khởi tạo global thông qua ::
-    - truy cập bất cứ đâu (ko phụ thuộc object)
+        - thuộc tính chia sẻ chung address giữa các object class
+        - khởi tạo global thông qua ::
+        - truy cập bất cứ đâu (ko phụ thuộc object)
     + static method
-    - method chia sẻ ko phụ thuộc object class
-    - có thể gọi static properties
-    - Không cho phép gọi non-static method/properties
+        - method chia sẻ ko phụ thuộc object class
+        - có thể gọi static properties
+        - Không cho phép gọi non-static method/properties
 
 */
 class student

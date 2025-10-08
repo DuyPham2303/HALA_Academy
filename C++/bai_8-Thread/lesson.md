@@ -5,13 +5,28 @@
 
 ## 1.1 Process (tiến trình) 
 + Là các Chương trình chạy trên hệ thống
-+ Có địa chỉ riêng 
++ Có địa chỉ và bộ nhớ riêng
 + Tương tác được với ngoại vi khác phần cứng bên ngoài
 + 1 process có thể chứa nhiều thread
-## 1.2 Thread (Luồng
+`Ví dụ:` Khi mở các app trên máy tính như Zalo,chrome,Vscode
+## 1.2 Thread (Luồng)
 + Là Đơn vị nhỏ nhất của 1 process 
 + Các luồng trong cùng process chia sẻ tài nguyên chung
 + Có thể hiểu là 1 task chia thành nhiều câu lệnh -> các task sẽ được phân chía thời gian thực hiện xen kẽ nhau
+=> Bản chất đa luồng là chạy nhiều tác vụ (Task) cùng 1 lúc nhưng xen kẽ các cầu lệnh của nhau
+`Ví dụ`:
+
+__Khi mở zalo sẽ chứa__
+
++ 1 luồng gửi tin nhắn
++ 1 luồng nhận tin nhắn
+Khi mở Chrome (tiến trình mẹ) sẽ chứa nhiều tab là các 
+
+__tiến trình con chứa__
+
++ 1 luồng để chỉnh sửa văn bản
++ 1 lường để download file
++ nhiều luồng khác nếu có để thao tác trên mỗi tiến trình con
 ## 1.3 Ứng dụng của thread
 
 __+ Thao tác đa nhiệm trên máy tính mà ta sử dụng hằng ngày:__ Đây là ví dụ rõ nhất cho việc ứng dụng của thread trong cách mà nó xử lý các tác vụ. Mỗi khi ta chạy 1 chương trình nào đó ví dụ như chrome __(tiến trình)__ thì nhờ vào cơ chế đa luồng __(multithread)__ mà ta có thể mở nhiều tab cùng 1 lúc

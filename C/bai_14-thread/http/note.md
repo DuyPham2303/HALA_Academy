@@ -51,15 +51,10 @@ nếu client gửi GET /, server sẽ trả về HTML chào mừng.
 # Bước 2 
 + Server đọc nội dung file index.html thật từ ổ đĩa.
 + Gửi nội dung file đó về cho client khi truy cập /.
-<!-- 
-        Đọc file văn bản bằng C:
-
-        fopen(), fread(), fclose()
-
-        Đọc toàn bộ nội dung vào char *html
-
-        Gửi Content-Length chuẩn bằng strlen(html)
- -->
+    - Đọc file văn bản bằng C:
+    - fopen(), fread(), fclose()
+    - Đọc toàn bộ nội dung vào char *html
+    - Gửi Content-Length chuẩn bằng strlen(html)
 # Bước 3:
 + Hiểu cách phân tích URL path từ HTTP Request
 
@@ -102,15 +97,12 @@ Quy trình:
 + Server nhận, xử lý và lưu lại vào file như ở bước 4 và 5
 
 + Hiển thị thông báo Đã gửi thành công nếu mọi thứ ổn
-<!-- 
-    <form>	Gửi dữ liệu tới server
 
-    method="POST"	Chỉ định kiểu gửi là POST
+    - <form>	Gửi dữ liệu tới server
+    - method="POST"	Chỉ định kiểu gửi là POST
+    - action="/save-data"	Chỉ định URL sẽ nhận dữ liệu
+    - application/x-www-form-urlencoded	Dạng mặc định của dữ liệu form
 
-    action="/save-data"	Chỉ định URL sẽ nhận dữ liệu
-
-    application/x-www-form-urlencoded	Dạng mặc định của dữ liệu form
- -->
  # Bước 7 
 Hiển thị dữ liệu đã lưu ra trình duyệt bằng cách xử lý HTTP GET /data.
 
@@ -121,11 +113,10 @@ Khi truy cập http://localhost:8080/data, server sẽ:
 + Gửi nội dung đó về trình duyệt dưới dạng JSON hoặc HTML
 
 + Trình duyệt hiển thị dữ liệu người dùng đã gửi
-<!-- 
-    + fopen("r") + fread()	Đọc toàn bộ nội dung file
-    
-    + MIME type application/json	Giúp trình duyệt hiểu là JSON
-    
-    + Có thể trả về dạng HTML nếu muốn dễ xem hơn	
 
- -->
+    - fopen("r") + fread()	Đọc toàn bộ nội dung file
+    
+    - MIME type application/json -> Giúp trình duyệt hiểu là JSON
+    
+    - Có thể trả về dạng HTML nếu muốn dễ xem hơn	
+

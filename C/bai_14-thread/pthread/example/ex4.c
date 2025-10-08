@@ -1,8 +1,11 @@
-#include <pthread.h>
-#include <stdio.h>
-#include <unistd.h>
+
+#include <pthread.h>    // thư viện POSIX Thread
+#include <stdio.h>      // hỗ trợ log qua printf
+#include <unistd.h>     // Hỗ trợ các hàm delay 
+#include <stdlib.h>     // hỗ trợ hàm rand để mô phỏng tạo số ngẫu nhiên
+
+
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdatomic.h>
 
 atomic_int val;

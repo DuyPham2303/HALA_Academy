@@ -12,6 +12,7 @@ using namespace std;
 */
 class Car{
     public:
+        //không nên xài phương thức chứa triển khai mặc định -> nên để cho lớp con tự định nghĩa để phù hợp cho nhiều đối tượng khác nhau
         virtual void refuel(){
             cout << "Đổ xăng" << endl;
         }

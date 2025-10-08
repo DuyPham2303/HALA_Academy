@@ -1,15 +1,17 @@
 #include <iostream>
 using namespace std;
 /* 
-    Interface Segregation Principle : Quy định 1 hệ thống nên chia thành nhiều base class tương ứng với chức năng/nhiệm vụ xử lý khi được kế
-    thừa lại từ class con -> tránh việc chỉ triển khai 1 base class duy nhất -> dẫn đến nhiều class con khác nhiệm vụ/hành vi lại 
-    truy cập đến các method không liên quan đến nó
+    Interface Segregation Principle : 
+    - Quy định 1 hệ thống nên chia thành nhiều base class tương ứng với chức năng/nhiệm vụ xử lý khi được kế
+    thừa lại từ class con 
+    -> tránh việc chỉ triển khai 1 base class duy nhất 
+    -> dẫn đến nhiều class con khác nhiệm vụ/hành vi lại truy cập đến các method không liên quan đến nó
     + Ví dụ ta triển khai 1 base class duy nhất để mô tả hành vi của 1 phương tiện di chuyển
         - lái xe
         - đổ xăng
         - chở hàng hóa
-    => các class con như bike,car,motor khi kế thừa từ base class trên sẽ không có nhu cầu sử dụng toàn bộ -> dẫn đến có khả năn truy cập 
-    vào các method ko liên quan để sử dụng -> sai hành vi hệ thống
+    => các class con như bike,car,motor khi kế thừa từ base class trên sẽ không có nhu cầu sử dụng toàn bộ 
+    -> dẫn đến có khả năng truy cập ào các method ko liên quan để sử dụng -> sai hành vi hệ thống
 
 */
 class IVehicle
@@ -28,7 +30,7 @@ public:
         cout << "Lái xe đạp" << endl;
     }
 
-    void refuel() override {} // Không hợp lý với xe đạp
+    void refuel() override {} // Không cần thiết với xe đạp (có thể ghi đè cách triển khai -> sai hành vi, bản chất của class con hiện tại)
     void loadCargo() override {}
 };
 

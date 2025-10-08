@@ -15,6 +15,8 @@
 #include "Keyboard.h"
 #include "utils.h"
 #include "can_frame.h"
+#include <stdlib.h>
+#include <time.h>
 
 void LogStatus(Door* doors);
 void UpdateStatus(Door *door);
@@ -24,6 +26,15 @@ void TestPointer(Door* door);
 
 int main()
 {
+    srand(time(NULL));
+
+
+    for(int i = 0 ; i < 9 ; i++){
+        uint8_t num = rand() % 100 + 100;
+        uint8_t res = reverseBits(num);
+        printf("num = %d\tres = %d\n",num,res);
+    }
+    return 0;
     //Khai báo mảng 4 cửa
     Door door[N_DOORS];
     //khai báo frame xử lý dữ liệu 

@@ -4,20 +4,22 @@
     + Ví dụ: ta có 1 method để bật/tắt 1 đối tượng là bóng đèn 
     -> thay vì gắn chặt hành vi này cho 1 thực thể -> cho phép nó gắn với nhiều thực thể 
 */
-class LightBulb
-{
-    public:
-        void turnOn() { /* Bật đèn */ }
-};
+#include <iostream>
+using namespace std;
+// class LightBulb
+// {
+//     public:
+//         void turnOn() { /* Bật đèn */ }
+// };
 
-class Switch
-{
-    private:
-        LightBulb bulb;
+// class Switch
+// {
+//     private:
+//         LightBulb bulb;
        
-    public:
-        void operate() { bulb.turnOn(); }
-};    
+//     public:
+//         void operate() { bulb.turnOn(); }
+// };    
 
 
 /* 
@@ -27,18 +29,24 @@ class Switch
         + device cụ thể 
     Chỉ gọi ra Hàm xử lý trừu tượng để xử lý mà không cần biết chi tiết hệ thống gọi ra class cụ thể nào
 */
+//lớp ban đầu để kế các deprived khác kề thừa và ghi đè
 class Device{
     public:
         virtual void turnOn() = 0;
 };
 class LightBulb : public Device{
     public:
-        void turnOn() override { /* Bật đèn */ }
+        void turnOn() override { 
+            cout << "Turn the LightBulb on\n";
+        }
 };
 class Fan : public Device{
     public:
-        void turnOn() override { /* Bật quạt */ }
+        void turnOn() override { 
+            cout << "Turn the fan on\n";
+        }
 };
+//lớp trung gian để trừu tượng việc gọi đối tượng và hành vi cụ thể  
 class Switch{
     private:
         Device *device;
@@ -47,5 +55,10 @@ class Switch{
         Switch(Device *d) : device(d){}
         void operate() { device->turnOn(); }
 };
+int main(){
+   Device* device1 = new LightBulb;
+   Switch switch1(device1);
+   switch1.operate();
+}
    
 

@@ -14,18 +14,19 @@ uint8_t checkParity(uint8_t byte){
 }
 uint8_t reverseBits(uint8_t byte){
     /* 
-        0b 1010 1010
-                   1
-           000000010
+        0b 1010 1010 (byte)
+           0000 0001 (bitmask)
+        0b 0000 0001 (reverse)
+           
     */
     uint8_t bitmask = 1;
     uint8_t reverse = 0;
     for(int i = 0 ; i < 8 ; i++){
-        reverse <<= 1; //dịch sang vị trí kế tiếp
-        if(byte & 0x80){
-            reverse |= bitmask; //set bit 1
+        reverse <<= 1; //dịch trái để đẩy bit đầu về cuối
+        if(byte & bitmask){
+            reverse |= 1; //set bit 1
         }
-        byte <<= 1;
+        bitmask <<= 1;  //dịch trái để kiểm tra các bit 
     }  
     return reverse;
 }

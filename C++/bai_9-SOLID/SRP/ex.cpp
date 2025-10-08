@@ -4,11 +4,12 @@ using namespace std;
     - Single Responsibility Principle : quy định 1 class chỉ nên quản lý 1 tính năng, nhằm mục đích
         + giảm thiểu sự phức tạp
         + Dễ dàng kiểm tra và xử lý lỗi, khi chia nhỏ hệ thống ra thành các module
+        => Tiền đề cho OCP 
     - Ví dụ: ta có 1 hệ thống điều khiển động cơ gồm 3 tác vụ
         + đọc data
         + xử lý data
         + truyền data (có thể nhiều kiểu -> uart,spi,i2c,can)
-        => nếu gộp cả 3 hành vi vào 1 class như bên dưới sẽ khó quản lý (nếu sau này mở rộng thêm tính năng)
+        => nếu gộp cả 3 hành vi vào 1 class sẽ khó quản lý (nếu sau này mở rộng thêm tính năng)
 
 */
 class SpeedSensor
@@ -33,14 +34,15 @@ public:
         + dễ dàng mở rộng tính năng mới có liên quan đến mỗi hành vi
         + ví dụ :
         - EngineController có thể mở rộng thêm adjust các thuộc tính khác (Torque,current,voltage)
-        - SpeedSensor có thể mổ trộng thêm
+        - Sensor có thể mổ trộng thêm
             * các method đọc nhiều loại sensor khác nhau
             * các method hiệu chỉnh data đọc từ sensor để lọc nhiễu
 */
-class SpeedSensor
+class Sensor
 {
 public:
     double getSpeed() { return 40; }
+    //mở rộng thêm đọc các sensor khác
 };
 class EngineController
 {
@@ -56,10 +58,11 @@ public:
             cout << "Giảm tốc độ động cơ" << endl;
         }
     }
+    //Mở rộng thêm adjust các thông số khác như Toque, Current, Voltage
 };
 int main()
 {
-    SpeedSensor speedSensor;
+    Sensor speedSensor;
     double speed = speedSensor.getSpeed();
     EngineController engine;
     engine.adjustSpeed(speed);

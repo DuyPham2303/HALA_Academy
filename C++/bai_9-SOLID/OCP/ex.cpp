@@ -1,16 +1,24 @@
 #include <iostream>
 using namespace std;
 /* 
-    - Open-closed Principle : quy định 1 hệ thống khi đã chạy ổn định thì sẽ không được chỉnh sữa khi thêm new features đảm bảo
-        + rủi ro can thiệp và thay đổi trực tiếp mã nguồn, dễ gây lỗi
-        + Giảm bớt độ complex, tgian khi trace back vị trí trong code cần chỉnh sửa -> chương trình càng lớn -> thay đổi ko cẩn thận -> lỗi dây chuyền 
-    Ví dụ : phát triển 1 hệ thống cảnh báo trên xe hơi, sử dụng 1 class như bên dưới để quản lý thì xảy ra vấn đè
-     + cần thêm các phương thức cảnh báo cụ thể như sound,blink led 
-        -> can thiệp trực tiếp mã nguồn -> không tối uu -> hệ thống càng lớn -> sửa code trực tiếp -> lỗi dây chuyền
-
+    - Open-closed Principle : quy định 1 hệ thống khi đã chạy ổn định thì sẽ không được chỉnh sửa 
+                              khi thêm tính năng mới để đảm bảo
+        + tránh rủi ro can thiệp và thay đổi trực tiếp mã nguồn, dễ gây lỗi
+        + Giảm bớt độ complex, tgian khi trace back vị trí trong code cần chỉnh sửa 
+        + Yêu cầu Hệ thống phải đáp ứng SRP
 */
+
 class SpeedAlert
 {
+    //Ví dụ : phát triển 1 hệ thống cảnh báo trên xe hơi
+    /* 
+     + Nếu cần thêm các phương thức cảnh báo cụ thể như sound,blink led 
+        -> can thiệp trực tiếp mã nguồn 
+        -> không tối ưu 
+        -> hệ thống càng lớn 
+        -> sửa code trực tiếp 
+        -> lỗi dây chuyền 
+    */
     public:
         void sendAlert(double speed)
         {
@@ -20,6 +28,7 @@ class SpeedAlert
             }
         }
 };
+
 /* 
     - Hướng giải quyết như bên dưới giúp hệ thống mở rộng tính năng mới mà ko cần can thiệp mã nuồn ban đầu
     + Yêu cầu triển khai ? hệ thống cần tuân theo SRP -> tách biệt nhiệm vụ các hành vi cụ thể thành class riêng biệt
@@ -28,8 +37,11 @@ class SpeedAlert
 */
 class Device_Alert{
     public:
+        //Khi sử dụng được gọi thông qua 1 hàm/class trung gian để xác định phiên bản tương ứng với deprived class 
         virtual void sendAlert(double speed) = 0;   //hành vi tổng quát -> chưa biết hướng triển khai cụ thể
 };
+
+//kế thừa để ghi đè phương thức tổng quát
 class Sound_Alert : public Device_Alert{
     public:
         void sendAlert(double speed) override{  //triển khai cụ thể cách thức xử lý
@@ -47,7 +59,10 @@ class LED_Alert : public Device_Alert{
         }
 };
 
-void handleSpeedAlert(Device_Alert *alert, double speed){ alert->sendAlert(speed); }
+//Hàm trừu tượng đi quá trình gọi phương thức xử lý cảnh báo cho nhiều loại cảm biến khác nhau
+void handleSpeedAlert(Device_Alert *alert, double speed){ 
+    alert->sendAlert(speed); //tính đa hình cho phép xác định phiên bản tương ứng sẽ được gọi
+}
    
 int main(){
     Sound_Alert sound;

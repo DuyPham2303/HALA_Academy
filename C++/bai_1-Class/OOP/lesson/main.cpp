@@ -7,7 +7,7 @@ using namespace std;
     + encapsulation : quá trình đóng gói dữ liệu, ân đi thuộc tính hệ thống thông qua (private/protected)
         -> Giấu đi việc truy cập trực tiếp các biến
 
-    + abstraction : quá trình trừu tượng đi quá trình xử lý logic, thuật toán
+    + abstraction :  trừu tượng đi quá trình xử lý logic, thuật toán
         -> Giấu đi phần triển khai cụ thể, truy cập thông qua API
 
     + Inheritance : khả năng tái sử dụng tài nguyên của lớp có sẵn, và chỉ việc mở rộng thểm các chức năng mới
@@ -43,7 +43,8 @@ private:
 
 public:
     Person(string name, int age);
-    void printInfo(); // hàm ảo cho phép lớp con ghi đè cách triển khai, khi gọi thông qua object của base class
+    void printInfo(); 
+    // hàm ảo cho phép lớp con ghi đè cách triển khai, khi gọi thông qua object của base class
     virtual void Info()
     {
         if (verifyNumber())
@@ -114,8 +115,8 @@ private:
 
 public:
     Student(string name, int age, string major, float gpa) : Person(name, age), major(major), gpa(gpa) {}
-    void printInfo()
-    { // overloading function -> mở rộng method của base class
+    void printInfo()  // overloading function -> mở rộng method của base class
+    {
         cout << "Thông tin SINH VIÊN" << endl;
         Person::printInfo();
         cout << "major : " << major << endl;
@@ -185,11 +186,12 @@ int main()
         - tự động xác định phiên bản khác nhau của cùng 1 hàm dựa trên đối tượng đang được trỏ tới
         - chỉ áp dụng cho hàm ảo kế thừa bởi lớp con (không cần ép kiểu như ví dụ trên)
     */
+    cout << "----------------------------" << endl;
     p = &st1;
-    p->printInfo();
+    p->Info();
     p->behaviour();
     p = &Tc1;
-    p->printInfo();
+    p->Info();
     p->behaviour();
     
     return 0;

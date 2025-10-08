@@ -49,7 +49,7 @@ int main() {
         if (strcmp(method, "GET") == 0 && strcmp(path, "/") == 0) {
             
             //data thực được gủi
-            const char *body = "<html><h1>Hello from C HTTP Server!PHAM CAO DUY</h1></html>";
+            const char *body = "<html><h1>Hello from C HTTP Server! PHAM CAO DUY</h1></html>";
             char response[1024];
             sprintf(response,
                 "HTTP/1.1 200 OK\r\n"           //mã phản hồi 

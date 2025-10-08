@@ -3,11 +3,10 @@
 #include <unistd.h>
 
 /* 
-    -  Trường hợp mô phỏng 
     + chạy join trước/sau main thread 
         -> trước main : thread main chờ cho đến khi join xong mới thực hiện
         -> sau main : thread main chạy song song với join
-    + chạy detach trước/sau main thread
+    + chạy detach trước/sau main thread : 
     + kết hợp chạy detach và join
         -> gọi join,detach trước main
         -> gọi join,detach sau main 
@@ -44,6 +43,7 @@ int main(int argc, char const *argv[])
     pthread_t t1;
     pthread_t t2;
 
+    /* DEMO CHẠY SONG SONG CÁC TASK PHỤ VÀ MAIN */
     pthread_create(&t1,NULL,task1,"task 1");
     pthread_create(&t2,NULL,task2,"task 2");
 
