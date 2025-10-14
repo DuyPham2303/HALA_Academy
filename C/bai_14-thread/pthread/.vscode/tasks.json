@@ -12,7 +12,8 @@
                 "-O0",
                 "${fileBasename}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                //"${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "main.exe",
                 "-lws2_32"
             ],
             "options": {

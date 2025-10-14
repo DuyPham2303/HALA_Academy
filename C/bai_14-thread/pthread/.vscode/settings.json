@@ -7,6 +7,9 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "os_types.h": "c",
+        "os_cfg.h": "c",
+        "os.h": "c"
     }
 }
