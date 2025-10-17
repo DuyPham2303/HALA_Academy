@@ -10,8 +10,10 @@ int shared_data = 0;
 /* 
     - MÔ phỏng cơ chế quản lý cờ trạng thái 
     - sử dụng store/load để ghi/đọc trạng thái của cờ -> quyết định khi nào kiểm tra dữ liệu
-*/
-void* producer(void* arg) {
+    - nhược điểm : Lường đợi vẫn xử lý check tín hiệu liện tục 
+        => sử dụng condition variable để khắc phục
+    */
+void* Sender(void* arg) {
     for(int i = 0 ; i < 10 ; i++){
         shared_data = rand() % 50;  //mô phỏng data ngẫu nhiên
         //đánh dấu trạng thái có data
@@ -22,13 +24,12 @@ void* producer(void* arg) {
     return NULL;
 }
 
-void* consumer(void* arg) {
+void* Receiver(void* arg) {
     while(1){
         printf("Consumer: đợi dữ liệu...\n");
         while (atomic_load(&data_ready) == 0) { // Đọc flag atomically
-            // Có thể thêm sleep nhỏ để giảm CPU
-            //printf("checking dataReady\n");
-            usleep(1000);
+            printf("checking dataReady\n");
+            usleep(10*1000);
         }
         printf("Consumer: nhận được data = %d\n", shared_data);
 
@@ -41,8 +42,8 @@ void* consumer(void* arg) {
 int main() {
     srand(time(NULL));
     pthread_t t1, t2;
-    pthread_create(&t1, NULL, producer, NULL);
-    pthread_create(&t2, NULL, consumer, NULL);
+    pthread_create(&t1, NULL, Sender, NULL);
+    pthread_create(&t2, NULL, Receiver, NULL);
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
 }

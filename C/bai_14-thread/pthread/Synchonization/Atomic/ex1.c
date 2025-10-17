@@ -11,7 +11,6 @@ typedef struct {
 
 int main() {
     Device *d = malloc(sizeof(Device));
-
     atomic_init(&d->id, 101);
     atomic_init(&d->counter, 0);
 

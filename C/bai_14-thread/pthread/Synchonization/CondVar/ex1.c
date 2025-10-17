@@ -55,15 +55,6 @@ int main(){
 
     pthread_create(&t1,NULL,task_calculation,"task_calculation");
     pthread_create(&t2,NULL,task_sensor,"task_sensor");
-    
-    for(int i = 0 ; i < MAX_task_calculation ; i++){
-        list_id[i] = i + 1; 
-        pthread_create(&thread_list[i],NULL,task_calculation,&list_id[i]);
-    }
-
-    for(int i = 0 ; i < MAX_task_calculation ; i++){
-        pthread_join(thread_list[i],NULL);
-    }
 
     pthread_join(t1,NULL);
     pthread_join(t2,NULL);

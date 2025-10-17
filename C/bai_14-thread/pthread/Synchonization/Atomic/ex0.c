@@ -4,9 +4,10 @@
 
 //int counter = 0;
 
-_Atomic int counter = 0;  //từ khóa có sẵn trong chuẩn C11
+//_Atomic int counter = 0;  //từ khóa có sẵn trong chuẩn C11
 
-//atomic_int count = 0;    //typedef được định nghĩa trong <stdatomic.h>
+atomic_int counter = 0;    //typedef được định nghĩa trong <stdatomic.h>
+
 /*
     quá trình thực thi của câu lệnh "counter++" trong CPU:
 
@@ -26,27 +27,17 @@ _Atomic int counter = 0;  //từ khóa có sẵn trong chuẩn C11
 */
 void* increment(void* arg) {
     for (int i = 0; i < 1000000; ++i)
-        atomic_fetch_add(&counter,1); //counter++;
+        atomic_fetch_add(&counter,1); 
+        //counter++;
     return NULL;
 }
-#define MAX_THREAD  500
+
 int main() {
-    // pthread_t t1, t2;
-    // pthread_create(&t1, NULL, increment, NULL);
-    // pthread_create(&t2, NULL, increment, NULL);
-    // pthread_join(t1, NULL);
-    // pthread_join(t2, NULL);
+    pthread_t t1, t2;
+    pthread_create(&t1, NULL, increment, NULL);
+    pthread_create(&t2, NULL, increment, NULL);
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
 
-
-    pthread_t arr[MAX_THREAD];
-    //int id[MAX_THREAD];
-
-    for(int i = 0 ; i < MAX_THREAD ; i++){
-        pthread_create(&arr[i],NULL,increment,NULL);
-    }
-    for(int i = 0 ; i < MAX_THREAD ; i++){
-        pthread_join(arr[i],NULL);
-    }
-
-    printf("Expected = 50,000,000, Actual = %d\n", atomic_load(&counter));
+    printf("Expected = 2000000, Actual = %d\n", atomic_load(&counter));
 }
