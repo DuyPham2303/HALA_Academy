@@ -24,17 +24,31 @@ __Quá trình biên dịch gồm các bước chính sau:__
 3. **Assembly**: Chuyển mã trung gian thành mã máy (file.o)
 4. **Linking**: Liên kết các phần của chương trình thành một file thực thi (file.exe)
 
-## 1. Preprocessing và Các Macro
+## 1. Preprocessing 
+**Ý nghĩa**
+- Quá trình mở rộng mã nguồn C bằng cách xử lý các chỉ thị tiền xử lý bao gồm
+    + chèn nội dung các tệp được chỉ định trong #include
+    + thay thế các macro được định nghĩa với #define
+    + xóa các comment
+    + xử lý các chỉ thị biên dịch có điều kiện, bằng cách đánh giá giá trị của các macro liên quan
+**Chỉ thị tiền xử lý là gì**
+- Là những chỉ thị được xử lý ở giai đoạn tiền xử lý
+- Có 3 loại chỉ thị 
+    - `#include `: bao hàm tệp
+    - `#define,#undef`   : định nghĩa/hủy macro
+    - `#if,#else,#elif,#ifndef,#ifdef,#endif,#error` : chỉ thị biên dịch có điều kiện
 
 ### 1.1 `#include`
-- **Mục đích**: Dùng để đưa các file header vào chương trình.
+- **Ý nghĩa** : chỉ thị bao hàm tệp
+- **Mục đích**: chèn nội dung của tệp bên ngoài vào mã nguồn.
 - **Cách sử dụng**:
-  - `"file.h"`: Dùng cho file header trong cùng thư mục.
-  - `<file.h>`: Dùng cho thư viện hệ thống hoặc thư viện ngoài.
+  - `"file.h"`: chèn nội dung của tệp trong thư mục dự án.
+  - `<file.h>`: chèn nội dung của tệp hệ thống cài đặt trên máy tính
 
 
 ### 1.2 `#define`
-- **Mục đích**: định nghĩa macro để thay thế 1 đoạn văn bảng, hằng số, chuỗi, hàm 
+- **Ý nghĩa** :  là một loại chỉ thị tiền xử lý, được định nghĩa bằng #define, trước khi chương trình biên dịch
+- **Mục đích**: chỉ thị thay thế, được dùng để thay thế 1 đoạn văn bản hoặc chuỗi ký tự hoặc biểu thức bằng 1 đoạn văn bản khác để dại diện cho ý nghĩa cụ thể của chúng
    __Ví dụ__: Gọi hàm thông qua macro
   ```c
   #define CREATE_FUNCTION(name,STR) \
@@ -276,25 +290,13 @@ __So sánh với các với các lệnh xử lý logic__
 | **Ví dụ sử dụng**   | Tùy chỉnh biên dịch cho các cấu hình khác nhau như DEBUG, RELEASE | Quyết định hành động dựa trên giá trị biến tại thời điểm chạy |
 
 
-
-### 1.6 `Tổng kết quá trình tiền xử lý`
-**Các bước**:
-  - mở rộng mã nguồn (.c) sang mã tiền xử lý (.i)
-  - Xóa các comment
-  - xử lý các điều kiện tiền xử lý
-    
-    => chỉ thị biên dịch có điều kiện : lựa chọn đoạn mã để thực thi dựa trên sự tồn tại của macro và điều kiện biên dịch khác nhau
-    
-    =>  chỉ thị thay thế tệp : thay thế nội dung trong các file header
-    
-    =>  chỉ thị thay thế macro : thay thế tên macro bằng đoạn văn bản thay thế 
 - **Cú pháp**:
   ```c
   gcc -E main.c -o main.i
 ## 2. Compilation (Biên dịch)
-- **Mục đích** : dịch mã tiền xử lý sang mã trung gian (.s), cho phép thao tác trên các thanh ghi hệ thống, để quyết định cách thức lưu trữ và xử lý dữ bao gồm các bước 
-  + ánh xạ và lưu trữ các biến vào thanh ghi hoặc bộ nhớ RAM
-  + chuyển đổi các phép toán và lệnh vào thanh ghi
+- **Mục đích** : dịch mã tiền xử lý sang mã trung gian, để thực hiện phân tích cú pháp, và ngữ nghĩa của chong7 trình nhằm quyết định cách
+    + Ánh xạ và lưu trữ các biến vào bộ nhớ
+    + Tối ưu hóa mã lệnh và sinh ra chỉ dẫn tương ứng để thao tác thên thanh ghi hoặc vùng nhớ
 
   Mã nguồn C
   ```c 
@@ -313,16 +315,16 @@ __So sánh với các với các lệnh xử lý logic__
   gcc -S main.i -o main.s
 
 ## 3. Assembler (Hợp dịch)
-- **Mục đích**: dịch mã trung gian (.s) sang ngôn ngữ cấp thấp cụ thể là mã máy(.o), chứa file nguồn thể hiện dưới các giá trị binary mà máy chỉ có thể hiểu và xử lý
+- **Mục đích**: Dịch mã trung gian sang mã máy (machine code - binary), tạo ra tệp object chứa các mã lệnh có thể hiểu bởi cpu
 - **Cú pháp:**
   ```c
   gcc -o main.i -o main.i
 
 ## 4. Linker (Liên kết)
-- **Mục đích** : Liên kết nhiều tệp mã máy (.o) lại với nhau (nếu có) để tạo ra tệp thực thi (.exe), là tệp kết quả chạy chương trình. Gồm các bước
-  + Kết nối các thư viện hệ thống và tệp header
-  + Tìm và liên kết lời gọi hàm và định nghĩa của chúng
-  + Báo lỗi nếu gọi hàm chưa được định nghĩa
+- **Mục đích** :Liên kết nhiều tệp mã máy lại để tạo ra tệp thực thi mà chương trình chạy được, nó xử lý các bước
+    + Liên kết các thư viện hệ thống và tệp header
+    + Tìm và liên kết lời gọi hàm và định nghĩa của chúng
+    + Báo lỗi nếu gọi hàm chưa được định nghĩa 
 
 - **Cú pháp:**
   ```c
