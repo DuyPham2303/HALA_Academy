@@ -160,7 +160,18 @@ __So sánh macro, biến và hàm__
     - `__VA_ARGS__` : thay thế các đối số truyền vào 
 
   ```
-   __Ví dụ__ : Tính tổng danh sách phần tử đối số
+
+__Minh họa__ 
+
+```c
+#define print(...) __VA_ARGS__ 
+int main()
+{
+    print(12,34,53,12); //12,34,53,12 (preprocessing)
+    return 0;
+}
+```
+   __Ví dụ 1__ : Tính tổng danh sách phần tử đối số
 
   __Cách 1:__ sử dụng sizeof() để xác định số lượng đối số
   ```c
@@ -192,8 +203,77 @@ __So sánh macro, biến và hàm__
       tong += arr[i++];                          \
     }                                            \
     printf("tong:%d\n", tong);
-    ```
-  
+  ```
+
+__Ví dụ __ : Xây dựng giao diện tương tác
+- Trong các hệ thống tương tác giao diện người dùng, ví dụ như màn hình điều khiển trong ô tô, ta thường sử dụng cách đơn giản sau (phổ biến với người mới học lập trình)
+    + printf() : hiẻn thị các lựa chọn tính năng
+    + switch - case : xử lý lựa chọn của người dùng
+```c
+    printf("1.option1");
+    switch(option) {
+    case 1: feature1(); break;
+    case 2: feature2(); break;
+    ...
+}
+```
+- Cách làm trên tuy dễ hiểu, đơn giản và phù hợp với dự án nhỏ trong học tập
+- Tuy nhiên trong dự án thực tế (thường phức tạp hơn). nó sẽ bộc lộ 1 số hạn chế khi hệ thống cần mổ rộng thêm chức năng
+
+**Nguyên tắc thiết kế phần mềm**
+- Tái sử dụng `(Reusability)` :
+    + mã nguồn nên được đóng gói thành hàm để gọi khi cần mà không cần viết lại
+    + Hệ thống lớn sẽ chứa nhiều module độc lập thực hiện các chức năng khác nhau
+    + Ví dụ module màn hình điều khiển chứa các phần
+      - hiển thị menu
+      - xử lý lựa chọn
+      - gọi tính năng
+- Dễ dàng mở rộng `(Scalability)` :
+    + Đảm bảo không can thiệp mã nguồn khi thêm tính năng
+    + Hệ thống lớn chức mã nguồn phức tạp, cần tránh sữa trực tiếp nhằm
+      - tránh lỗi dây chuyền
+      - đảm bảo tính ổn định cho các phần đã chạy ổn
+    
+**Vấn để của cách triển khai cũ**
+- Cần sửa switch-case, printf() khi cần cập nhật tính nằng
+- Dẫn đến lỗi ngoài ý muốn do can thiệp mã nguồn đã kiểm thử
+- Khi dự án lớn dẫn  kiểm soát luồng logic trỏ nên khó khăn, ảnh hưởng bảo trì
+
+**Hướng cải tiến**
+- Thiết kế lại hệ thống menu thành module tổng quát như sau
+
+__Ví dụ:__ Viết hàm tổng quát hiển thị các tính năng trong menu
+
+```c
+#define PRINT_MENU_ITEM(number, item) printf("%d. %s\n", number, item)
+```
+__Ví dụ:__ Viết hàm tổng quát xử lý thêm tính năng vào menu 
+
+```c
+#define PRINT_MENU(...)                             \
+    do {                                            \
+        const char* items[] = {__VA_ARGS__};        \
+        int n = sizeof(items) / sizeof(items[0]);   \
+        for (int i = 0; i < n; i++) {               \
+            PRINT_MENU_ITEM(i + 1, items[i]);       \
+        }                                           \
+    } while (0)```
+```
+__Ví dụ:__ Viết hàm tổng quát xử lý lựa chọn từ người dùng
+
+```c
+#define CASE_OPTION(number, function) case number: function(); break;
+#define HANDLE_OPTION(option, ...)              \
+    switch (option) {                           \
+        __VA_ARGS__                             \
+        default: printf("Invalid option!\n");   \
+    }
+
+void feature1() { printf("Feature 1 selected\n"); }
+void feature2() { printf("Feature 2 selected\n"); }
+void feature3() { printf("Feature 3 selected\n"); }
+void feature4() { printf("Feature 4 selected\n"); }
+```
 
 ### 1.5 Chỉ thị biên dịch có diều kiện
 - **#ifdef / #ifndef / #error /#endif**: kiểm tra sự tồn tại của 1 macro và tránh khai báo lại nhiều lần
