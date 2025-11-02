@@ -1,29 +1,150 @@
 # 1. Tổng quan về Pointer
 ## 1.1 Khái niệm
-Con trỏ là 1 biến dùng để lưu trữ địa chỉ của 1 biến khác hoặc 1 đối tượng như hàm, mảng, struct
+- Là 1 loại biến dùng để lưu trữ giá trị là địa chỉ của 1 đối tượng (biến thông thường, con trỏ, hàm, mảng)
+- Sử dụng khi cần thao truy cập đọc/ghi, thao tác trên nhiều vùng nhớ một cách linh hoạt, nhanh chóng, tối ưu
 
-## 1.2 Cách dùng thông thường 
-con trỏ p sẽ trỏ tới biến a ngay khi nó được khởi tạo
-```bash
-  int a = 34;
-  int* p = &a;
-```
-giá trị của con trỏ p chính là địa chỉ của biến a, trong khi sử dụng toán tử truy xuất * sẽ in ra giá trị tại địa chỉ đó
-```bash
-  printf("address of a:%p\n",p);
-  printf("value of a:%d",*p);
-```
-## 1.3 Kích thước:
-phụ thuộc vào hệ điều hành. 8 byte(64bit) và 4 byte (32bit)
-- kích thước của con trỏ p được in bằng cách sử dụng hàm sizeof()
-- Con trỏ p được khai báo là NULL khi chưa được gán địa chỉ cụ thể, để không trỏ tới địa chỉ rác gây ra lỗi không xác định
+<p align = "center">
+<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/58b43943-3851-4847-a917-70c7e60703c7" />
 
-```bash
-  int* p = NULL;
-  printf("size of a:%d\n",sizeof(p));
+
+## 1.2 Bản chất lưu trữ (RAM, Address, giá trị)
+
+<p align = "center">
+<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/531425a3-7514-479d-95eb-6ba981f58b9b" />
+
+### 1.2.1 Địa chỉ và giá trị trong bộ nhớ
+- Biến lưu trên RAM có đặc điểm
+  + Lưu trong một vùng nhớ chứa địa chỉ cấp phát liền kề
+  + biến int chiếm 4 byte cần 4 ô địa chỉ kế tiếp nhau
+  + Máy tính chỉ làm việc với byte, nên dù bất kỳ kiểu nào (int,float,double), đều được chia nhỏ thành từng byte để lưu ở 1 giá trị địa chỉ
+  + Giá trị ở dạng decimal được chuyển đổi thành hệ binary hoặc Hex khi lưu trữ (ví dụ : decimal (10) -> 0b1010 hoặc 0x0A)
+
+### 1.2.2 MSB & LSB
+- Quy định vị trí byte cao/thấp nhất của 1 dữ liệu nhiều byte
+  + MSB : Byte có trọng số cao nhất  (bên trái ngoài cùng)
+  + LSB : Byte có trọng số thấp nhất (bên phải ngoài cùng)
+  + Ví dụ : int a = 10 thì LSB biểu diễn 0x0A. Tùy theo cách sắp xếp byte trên RAM 0x0A có thể nằm ở low/high address __(Khái niệm về endian)__
+
+### 1.2.3 Con trỏ luu trên RAM
+- Đặc điểm
+  + có địa chỉ của riêng nó
+  + mỗi ô địa chỉ chứa 1 byte địa chỉ của đối tượng mà nó trỏ đến
+  + được cấp phát 4 hoặc 8 byte __(tùy theo kiến trúc máy tính / MCU)__
+
+## 1.3 Endianess
+### 1.3.1 Khái niệm
+Khái niệm để mô tả thứ tự sắp xếp các byte của 1 dữ liệu nhiều byte ở các vùng địa chỉ được cấp phát trên bộ RAM. Được chia làm 2 loại là big và little endian 
+
+<p align = "center">
+<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/440efc8a-3f00-487a-abd7-5ff8ab67f989" />
+
+`Ví dụ` : kiểm tra kiến trúc máy tính chạy kiểu endian nào dựa trên đoạn code sau 
+
+```c
+int main() { 
+  //khai báo số nguyên 4 byte -> gán giá trị hex -> chiếm 4 byte liên tiếp
+  unsigned int x = 0x12345678; 
+  //ép kiểu để đồng bộ với kiểu con trỏ 
+  //cho phép con trỏ đọc từng byte -> đọc lần lượt từng byte
+  unsigned char *p = (unsigned char *)&x; 
+  printf("Byte[0] = %02X\n", p[0]); 
+  printf("Byte[1] = %02X\n", p[1]); 
+  printf("Byte[2] = %02X\n", p[2]);
+  printf("Byte[3] = %02X\n", p[3]); 
+  return 0; }
 ```
-## 1.4 Kiểu dữ liệu của con trỏ: 
-kiểu dữ liệu mà con trỏ được khai báo cho biết số byte mà nó truy xuất hay đọc ra trong 1 lần. Ta có ví dụ sau đây để minh họa về kiểu dữ liệu của 1 con trỏ 
+
+__Lưu ý__ : Ép kiểu con trỏ không thay đổi kiểu dữ liệu của biến ban đầu, nó chỉ thay đổi cách nhìn để truy cập đọc/ghi dữ liệu thông qua con trỏ 
+
+`Tóm tắt `: Kiểu endian phụ thuộc vào kiến trúc CPU và ảnh hưởng đến cách ta thao tác với dữ liệu khi giao tiếp các hệ thống khác nhau như (MCU - Sensor) hay truyền thông mạng (Networking)
+
+### 1.3.2 Ứng dụng 
+Trong thực tế, Endianess sẽ ảnh hưởng trực tiếp đến cách dữ liệu được truyền giữa các thiết bị có nền tảng CPU khác nhau.
+
+
+**Giao tiếp Sensor - MCU - PC**
+
+<p align = "center">
+<img width="650" height="400" alt="Image" src="https://github.com/user-attachments/assets/f7644535-9d44-4351-8d53-2d4723cd3550" />
+
+Trong hệ thống nhúng, dữ liệu được truyền dựa trên sơ đồ như trên và mỗi thành phần có thể sử dụng các kiến trúc CPU khác nhau. Ví dụ
+  + Sensor có thể dùng chip ARM (little endian)
+  + PC dùng intel x86 (little endian)
+  + Các thiết bị điều khiển / gateway (big endian)
+=> Chihn1 vì vậy nếu bên gửi (big endian) là "12 45 56 78" , thì bên nhận (little endian) có thể đọc ngược thứ tự byte __(nếu không chuyển đổi)__ . Dẫn đến sai dữ liệu nhận về
+
+```c
+uint16_t swap_endian(uint16_t val) {
+    return (val << 8) | (val >> 8);
+}
+```
+
+**Giao tiếp mạng**
+
+<p align = "center">
+<img width="650" eight="400" alt="Image" src="https://github.com/user-attachments/assets/ce1bc092-957b-41a1-913c-2756940e3ed9" />
+
+
+Trong mạng máy tính (TCP/IP) có đặc điểm
+  + các dữ liệu truyền thông luôn tuân theo chuẩn Networking Byte Order - Big Endian 
+  + đảm bảo mọi hệ thống đều chia sẻ chung 1 ngôn ngữ, dù bên gửi / nhận dùng little/big 
+
+```c
+uint32_t sensorData = 0x12345678;
+uint32_t netData = htonl(sensorData);  // chuyển sang Network Byte Order
+send(socket, &netData, sizeof(netData), 0);
+
+
+```
+## 1.4 Kích thước và kiểu dữ liệu 
+
+### 1.4.1 Kích thước con trỏ
+- Có các đặc điểm
+  + Không phụ thuộc vào datatype của nó
+  + phụ thuộc vào kiến trúc CPU (32 / 64 - bit) hoặc bộ vi xử lý 
+    + trên x86-64 : 8 byte 
+    + trên x86-32 : 4 byte
+    + trên ARM cortex-M (32 bit) : 4 byte
+  + phụ thuộc vào compiler : dù hệ thống chạy x86-64, nhưng compiler được cấu hình là 32-bit (msys32 hoặc gcc -m32) thì kích thước vẫn là 4 byte 
+
+`Ví dụ` : kiểm tra kích thước con trỏ 
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+int main(){
+    printf("%d bytes\n",sizeof(char*));
+    printf("%d bytes\n",sizeof(int*));
+    printf("%d bytes\n",sizeof(short*));
+    printf("%d bytes\n",sizeof(float*));
+    printf("%d bytes\n",sizeof(double*));
+    printf("%d bytes\n",sizeof(long*));
+    printf("%d bytes\n",sizeof(long long*));
+    printf("%d bytes\n",sizeof(bool*));
+    return 0;
+}
+```
+
+`Tóm tắt` : kích thước của con trỏ trên PC trên thực tế phụ thuộc vào mô hình biên dịch chứ không chỉ CPU
+
+### 1.4.1 Kiểu dữ liệu và Pointer Arithmetic
+- Kiểu dữ liệu quy định 
+  + số lượng byte mà nó được phép truy xuất đọc/ghi
+  + Bước nhảy của con trỏ khi thao tác ++/-- 
+  + ví dụ : p1 += 3 tương ứng với bước nhảy là 3 đơn vị * sizeof(int)
+```c
+int *p1;   // đọc/ghi 4 byte tại địa chỉ p1
+char *p2;  // đọc/ghi 1 byte tại địa chỉ p2
+double *p3;// đọc/ghi 8 byte tại địa chỉ p3
+```
+- Pointer Arithmetic 
+  + là các phép toán tăng/giảm địa chỉ (p++,p--)
+  + dùng để thay đổi giá trị của con trỏ
+  + con trỏ dịch chuyển qua vùng nhớ với bước nhảy tương ứng với datatype mà nó trỏ tới
+
+
+
+**Tách byte sử dụng con trỏ**
 
 ```bash
 #include<stdio.h>
@@ -40,195 +161,222 @@ int main(){
     return 0;
 }
 ```
-chương trình trên sử dụng con trỏ để tách 1 biến 2 byte và lưu vào 2 biến 1 byte với cách làm như sau
-+ con trỏ px sẽ trỏ tới địa chỉ của sum, và truy xuất 1 lần 1 byte do nó được khai báo là uint8_t, và lưu giá trị mà nó truy xuất vào biến bit_low
-```bash
-  uint8_t* px = (uint8_t*)&sum; 
-  uint8_t bit_low = *px;
-```
-+ con trỏ px sẽ di chuyển đến byte tiếp theo của sum, và lưu giá trị mà nó truy xuất vào bit_high
-```bash
-   uint8_t bit_high = *(px + 1);
-```
-kết quả
-```bash
-2 bit cao: 0xab 
-2 bit thap: 0xcd
-```
-# 2. Ứng Dụng của con trỏ 
-## 2.1 CON TRỎ VÀ MẢNG 
-con trỏ có thể được dùng để thao tác với các phần tử trong mảng bằng cách trỏ đến địa chỉ của mảng hay nói cách khác là địa chỉ đầu tiên trong mảng đó. 
-```bash
-int arr[] = {2,4,6,8,10};
-int* px = &arr; //hoặc arr
-```
-các phần tử trong mảng có thể được truy cập thông qua việc di chuyển địa chỉ của con trỏ px
-```bash
-for(int i = 0 ; i < 5 ; i++){
-  printf("index %d: %d/n",i,*(px + i));
-}
-```
-kết quả
-```bash
- index 0: 2
- index 1: 4
- index 2: 6
- index 3: 8
- index 4: 10
-```
-__Ứng dụng:__ Khi ta cần truyền 1 mảng vào trong hàm để xử lý thì ta chỉ cần truyền địa chỉ của nó và dùng 1 con trỏ như là tham số của hàm, lúc này con trỏ sẽ trỏ tới địa chỉ của mảng ta muốn xử lý chứ không phải truyền toàn bộ mảng vào hàm làm tốn tài nguyên của chương trình 
-## 2.2 CON TRỎ HẰNG (POINTER TO CONSTANT)
-con trỏ tới vùng nhớ chỉ có chức năng read-only mà không thể thay đổi giá trị tại địa chỉ đó, tuy nhiên nó có thể trỏ tới địa chỉ khác
-```bash
-int a = 23, b = 78;
-const int* p = &a;
-printf("truoc *p: %d\n",*p);
-//*p = 23; -> sai
-p = &b;
-printf("sau *p: %d\n",*p);
-```
-ket qua
-```bash
-truoc: 23
-sau: 78
-```
-__Ứng dụng:__ ta có thể sử dụng con trỏ hằng để bảo vệ những dữ liệu quan trọng mà ta không muốn bị tác động  thay đổi trong quá trình thực thi chương trình 
-## 2.3 HẰNG CON TRỎ (CONSTANT POINTER)
-con trỏ có thể thay đổi giá trị của vùng nhớ mà nó trỏ đến nhưng không thể trỏ tới vùng nhớ khác
-```bash
-int a = 23, b = 78;
-int* const p = &a;
-printf("truoc *p: %d\n",*p);
-//p = &b; -> sai
-*p = 45;
-printf("sau *p: %d\n",*p);
-```
-kết quả
-```bash
-truoc: 23
-sau: 45
-```
-__Ứng dụng:__ Hằng con trỏ có thể được dùng để lưu trữ địa chỉ cúa 1 thanh ghi và chỉ thao tác với các giá trị trên thanh ghi đó, giúp tách biệt và xử lý chính xác trên thanh ghi mà ta mong muốn 
-## 2.4 CON TRỎ VÔ ĐỊNH (VOID POINTER)
-con trỏ có thể trỏ tới bất kỳ kiểu dữ liệu nào
-+ con trỏ p dưới đây sau khi trỏ tới biến a sẽ được ép lại theo kiểu dữ liệu mà nó trỏ tới và dùng toán tử truy xuất * để lấy ra giá trị tại địa chỉ đó
-```bash
-int a = 43;
-void* p = &a;
-printf("%d",*((int*)p));
-```
-+ Con trỏ void cũng có thể dùng để trỏ tới 1 mảng lưu trữ nhiều giá trị đa dữ liệu
-```bash
-    double c = 765656.65653;
-    float d = 23.54;
-    int e = 21;
-    char f = 'e';
-    void* ph[] = {&c,&d,&e,&f};
-    printf("c = %lf\n",*((double*)ph[0]));
-    printf("d = %.2f\n",*((float*)ph[1]));
-    printf("e = %d\n",*((int*)ph[2]));
-    printf("f = %c\n",*((char*)ph[3])); 
-```
-kết quả
-```bash
-c = 765656.656530
-d = 23.54
-e = 21
-f = e
-```
-__Ứng dụng:__ Con trỏ void có thể được dùng để truyền nhiều loại dữ liệu khác nhau mà không cần phải viết lại hàm cho mỗi loại riêng biệt, giúp tối ưu và rút gọn chương trình 
-## 2. CON TRỎ HÀM (FUNCTION POINTER)
-con trỏ lưu địa chỉ của 1 hàm, có cấu trúc khai báo như sau
-```bash
-cách khai báo: (*pointer_name)(input parameter)
-```
-+ Ta có thể gọi 1 hàm thông qua con trỏ như sau 
-```bash
-void print(){
-  printf("hello world");
-}
-int main(){
-  void (*ptr)();
-  ptr = print; //gán địa chỉ hàm print cho con trỏ ptr
-  ptr(); //gọi con trỏ ptr để thực hiện hàm print
-}
-```
-+ Ta có thể gọi nhiều hàm thông qua việc trỏ tới từng hàm như sau
-### CÁCH 1
-```bash
-//định nghĩa các hàm
-void Tong(int a,int b){
-    printf("%d + %d = %d\n",a,b,a + b);
-}
-void Hieu(int a,int b){
-    printf("%d - %d = %d\n",a,b,a - b);
-}
-void Tich(int a,int b){
-    printf("%d x %d = %d\n",a,b,a*b);
 
-}
-void Thuong(int a,int b){
-    if(b != 0)
-       printf("%d / %d = %.2f\n",a,b,(float)a/b);
-    else printf("value of b is invalid\n");
-}
-```
-+ trong hàm main ta khai báo 1 con trỏ kiểu void với 2 tham số tryền và lần lượt trỏ tới từng hàm và truyền vào các giá trị để thực thi như sau
-  void (*operator)(int,int);
-```bash
-int main(){
-  void (*operator)(int,int);
-  operator = Tong;
-  operator(34,56);
+## 1.6 Con trỏ và mảng
 
-  operator = Hieu;
-  (*operator)(84,96);
+<p align = "center">
+<img width="400" height="350" alt="Image" src="https://github.com/user-attachments/assets/c6d0ae3b-d2ba-4ded-a74c-8014323ba2f3" />
 
-  operator = Tich;
-  operator(34,5);
+##3 1.6.1 Bối cảnh
+Khi làm việc với dữ liệu lớn ví dụ như buffer chứa nhiều phần tử 
+  + giao tiếp buffer trong truyền/nhận UART
+  + Mảng ký tự chuỗi
+=> Cần cơ chế để duyệt qua hay nói cách khác là truy cập đọc/ghi từng phần tử nhanh chóng và hiệu quả, chứ không cần khai báo nhiều biến (tốn memory) đó chính là con trỏ
 
-  operator = Thuong;
-  operator(34,12);
-  return 0;
+| Thành phần                        | Vai trò                                    | Lưu ý                                               |
+| --------------------------------- | ------------------------------------------ | --------------------------------------------------- |
+| `int arr[3] = {10, 20, 30};`      | Mảng gồm 3 phần tử `int`                   | `arr` là tên mảng, không phải biến con trỏ thực thụ |
+| `int *ptr = arr;`                 | Con trỏ trỏ đến phần tử đầu tiên của `arr` | `ptr` có thể di chuyển (`ptr++`)                    |
+| `arr[i]` tương đương `*(arr + i)` | Truy xuất giá trị tại chỉ số `i`           | Dựa vào **pointer arithmetic**                      |
+
+Lưu ý khi thao tác với con trỏ trên mảng 
+  + khi truyền tên mảng vào hàm chính là truyền địa chỉ của phần tử đầu mảng
+  + dữ liệu trong hàm có thể thay đổi mảng gốc thông qua tham số con trỏ trỏ đến địa chỉ của mảng truyền vào
+
+## 1.6.2 Ứng dụng và ưu điểm 
+
+| Ứng dụng                   | Giải thích                                                          |
+| -------------------------- | ------------------------------------------------------------------- |
+| **Buffer UART / ADC**      | Mảng chứa dữ liệu, con trỏ duyệt từng byte nhận được                |
+| **Truyền dữ liệu qua hàm** | Truyền con trỏ mảng thay vì toàn bộ mảng giúp tiết kiệm RAM         |
+| **DMA hoặc ISR**           | DMA cần địa chỉ bắt đầu của vùng dữ liệu → con trỏ trỏ đến `arr[0]` |
+
+
+# 2. Các loại con trỏ 
+## 2.1 Con trỏ vô định - Void Pointer
+### 2.1.1 Khái niệm và sử dụng
+- Con trỏ không có kiểu xác định
+  + có thể trỏ đến địa chỉ bất kỳ biến nào
+  + Nếu muốn truy cập biến đang trỏ tới cần ép về kiểu dữ liệu gốc
+  + Ứng dụng thao tác trên nhiều loại dữ liệu khác nhau mà không muốn tạo nhiều con trỏ riêng biệt
+  + (datatype*)ptr : thao tác ép kiểu để biết cần đọc bao nhiêu byte __(vì compiler không biết kích thước dữ liệu gốc)__
+
+```c
+//thay vì làm như sau 
+int *pInt;
+double *pDouble;
+char *pChar;
+
+//ta chỉ cần
+void* ptr; //thao tác trên bất kỳ biến nào 
+``` 
+
+### 2.1.2 Các ví dụ
+`Ví dụ` : Truy cập nhiều biến 
+```c
+void *ptr;
+int a = 10;
+double b = 3.14;
+char c = 'X';
+
+ptr = &a;
+printf("%d\n", *(int*)ptr);    // Ép kiểu sang int*
+
+ptr = &b;
+printf("%.2f\n", *(double*)ptr); // Ép kiểu sang double*
+
+ptr = &c;
+printf("%c\n", *(char*)ptr);   // Ép kiểu sang char*
+
+```
+
+`Ví dụ` : Truy cập thông qua mảng con trỏ void
+```c
+int a = 12;
+char b = 's';
+float c = 12.32;
+double d = 122333.12;
+char* str = "hello  world"; //'\0'
+
+void* ptr[] = {&a,&b,&c,&d,str};
+
+printf("a = %d\n", *(int *)ptr[0]);
+printf("b = %c\n", *(char *)ptr[1]);
+printf("c = %.2f\n", *(float *)ptr[2]);
+printf("a = %lf\n", *(double *)ptr[3]);
+printf("str = %s\n",(char*)ptr[4]); //in toàn bộ chuỗi
+
+//in từng ký tự của phần tử chuội 
+for(int i = 0 ; i < sizeof(str) ; i++){
+      printf("str[%d] = %c\n",i,*((char*)ptr[4] + i));
 }
 ```
-kết quả
-```bash
-34 + 56 = 90
-84 - 96 = -12
-34 x 5 = 170
-34 / 12 = 2.83
-```
-### CÁCH 2
-+ Ngoài ra ta cũng có thể sử dụng con trỏ hàm như là 1 đối số truyền vào, bằng cách sau
-```bash
-void Operator(void (*op)(int,int),int a,int b){
-    op(a,b);
+
+`Ví dụ` : Truy cập mảng con trỏ đến các chuỗi ký tự bằng con trỏ void
+
+```c
+char* pstr[] = {"hello","world","my name","is Duy"};
+
+//số lượng phần tử của pstr
+printf("size of pstr : %d\n",sizeof(pstr));
+
+//in ra rừng phần tử của pstr
+for(int i = 0 ; i < sizeof(pstr) / sizeof(pstr[0]); i++){
+    printf("str[%d] : %s\n",i,pstr[i]);
+}
+
+//độ dài của phần tử chuỗi ở index = 2
+int len = strlen(pstr[2]); 
+
+//in ra từng ký tự của phần tử chuỗi
+for(int i = 0 ; i < len  ; i++){
+    printf("%c",*(pstr[2] + i));
 }
 ```
-+ ta sẽ gọi hàm trên ở trong hàm main, và lân lượt truyèn địa chỉ các hàm vào, cùng với các giá trị để tính toán là a và bit_high
-```bash
-int main(){
-  int a = 23 , b = 2;
-  void (*operator)(int,int);
-  Operator(Tong,a,b);
-  Operator(Hieu,a,b);
-  Operator(Tich,a,b);
-  Operator(Thuong,a,b);
-  return 0;
-}
-```
-### CÁCH 3
-+ Ta cũng có thể tạo ra 1 mảng con trỏ hàm để trỏ tới từng địa chỉ của các hàm và sử dụng chúng như sau
-```bash
-int main(){
- void (*opeArr[])(int,int) = {Tong,Hieu,Tich,Thuong};
-    for(int n = 0 ; n < 4 ; n++){
-        opeArr[n](a,b);
+
+### 2.1.3 Tóm tắt chức năng và ứng dụng thực tế
+
+**Ưu điểm**
+- Tái sử dụng con trỏ cho nhiều kiểu 
+- Tổng quát hóa và rút gọn mã nguồn
+- Đơn giản hóa thiết kế (ví dụ : hàm xử lý đa kiểu dữ liệu - `Generic function`)
+**Nhược điểm**
+- Cần ép kiểu thủ công để truy cập đọc/ghi chính xác
+- Không thể áp dụng phép toán tăng/giảm hoặc dereference nếu chưa ép kiểu
+- Gây lỗi nếu ép sai kiểu
+
+**Ứng dụng thực tế**
+
+Trong hệ thống nhúng thực tế sử dụng nhiều cấu trúc dữ liệu khác nhau như (Linked list,Stack,Queue) - Tổng quát. Do đó void* giúp lưu trữ đĩa chỉ của mọi loại dữ liệu trong cùng 1 container 
+
+```c
+void printValue(void *ptr, int type) {
+    switch(type) {
+        case 0: printf("int: %d\n", *(int*)ptr); break;
+        case 1: printf("double: %.2f\n", *(double*)ptr); break;
+        case 2: printf("char: %c\n", *(char*)ptr); break;
     }
-return 0;
 }
 ```
-+ ta truy cập và gọi ra các hàm thông qua việc sử dụng chỉ số và tăng giá trị của nó mỗi khi di chuyển đến địa chỉ của hàm tiếp theo
 
-__Ứng dụng:__ Ta có thể dùng con trỏ hàm ứng dụng trong việc chọn hàm mà ta muốn xử lý ở những thời điểm khác nhau trong chương trình thông qua 1 con trỏ duy nhất, giúp tăng tốc và tiết kiệm thời gian gọi mỗi hàm thông qua việc truy cập chúng bằng con trỏ
+## 2.2 Con trỏ Null - Null Pointer
+
+### 2.2.1 Khái niệm & bối cảnh
+- Là con trò không trỏ đến bất kỳ vùng nhớ hợp lệ nào
+- Khi khai báo pointer mà chưa gán address cụ thể thì
+  + có thể chứa giá trị rác
+  + hoặc trỏ vùng nhớ random
+  + nếu cố tình truy cập đọc/ghi, dẫn đến
+    + gây lỗi segmentation fault (trên PC sẽ tự kích hoạt cảnh báo)
+    + hoặc ghi đè dữ liệu ngẫu nhiên trên MCU (Không có cơ chế bảo vệ memory)
+
+- Giải pháp gán NULL ngay khi khởi tạo nếu chưa sử dụng ngay giúp
+  + dễ kiểm tra có hợp lệ không trước khi dùng
+  + tránh lỗi `trỏ rác` khi chương trình chạy runtime
+
+```c
+int* ptr = NULL;
+```
+
+### 2.2.2 Ví dụ minh họa
+
+**Trường hợp truy cập con trỏ chưa khởi tạo**
+- Trong hệ thống nhúng, 
+    + nếu thực hiện dereference *ptr , có thể tro MCU hoặc reset watchdog
+    + do không có Os bảo vệ mem, lỗi Null pointer có thể gây hỏng dữ liệu toàn bộ hệ thống
+```c
+#include <stdio.h>
+
+
+void sensor_read()
+{
+    int *data;          // chưa khởi tạo
+    *data = 50;         // ❌ lỗi nghiêm trọng: ghi vào vùng nhớ ngẫu nhiên
+}
+```
+
+**Gán Null và kiểm tra trước khi dùng**
+
+```c
+#include <stdio.h>
+
+void sensor_read()
+{
+    int *data = NULL;
+
+    if (data == NULL)
+    {
+        // chưa có vùng nhớ -> cấp phát hoặc báo lỗi
+        static int sensor_cache = 0;
+        data = &sensor_cache;
+    }
+
+    *data = 50;  // an toàn, có địa chỉ hợp lệ
+}
+```
+
+### 2.2.3 Tóm tắt chức năng và ứng dụng thực tế
+
+**Vấn đề - giải pháp**
+- `Uninitialized pointer` 
+   + trỏ ngẫu nhiên gây lỗi bộ nhớ 
+   + Khắc phục ? gán NULL khi khai báo
+- `Truy xuất NULL `
+  + gây crash / reset hệ thống 
+  + khắc phục ? kiểm tra if(ptr != NULL) trước khi dùng
+- `Embedded không bảo vệ RAM`
+ + hỏng dữ liệu -> reset watchdog
+ + khắc phục ? luôn khởi tạo và kiểm tra con trỏ hợp lệ 
+
+**Ứng dụng thực tế**
+
+- `Driver layer` : khi trỏ tới DMA buffer / hardware reg cần được kiệm tra trước khi truy xuất
+- `RTOS task` : nếu NULL truyền nhầm vào hàm , nên có logic kiểm tra để tránh crash task
+
+## 2.3 Con trỏ đến hằng - Pointer to Const  
+
+## 2.4 Hằng con trỏ - Constant Pointer 
+
+## 2.5 Con trỏ hàm - Function Pointer
+
+## 2.6 Con trỏ đến con trỏ - Pointer to Pointer
