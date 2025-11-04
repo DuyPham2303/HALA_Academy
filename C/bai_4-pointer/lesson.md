@@ -16,7 +16,7 @@
 - Biến lưu trên RAM có đặc điểm
   + Lưu trong một vùng nhớ chứa địa chỉ cấp phát liền kề
   + biến int chiếm 4 byte cần 4 ô địa chỉ kế tiếp nhau
-  + Máy tính chỉ làm việc với byte, nên dù bất kỳ kiểu nào (int,float,double), đều được chia nhỏ thành từng byte để lưu ở 1 giá trị địa chỉ
+  + Máy tính chỉ làm việc với byte, nên dù bất kỳ kiểu nào (int,float,double), đều được chia nhỏ thành từng byte để lưu= ở 1 giá trị địa chỉ
   + Giá trị ở dạng decimal được chuyển đổi thành hệ binary hoặc Hex khi lưu trữ (ví dụ : decimal (10) -> 0b1010 hoặc 0x0A)
 
 ### 1.2.2 MSB & LSB
@@ -375,8 +375,224 @@ void sensor_read()
 
 ## 2.3 Con trỏ đến hằng - Pointer to Const  
 
+### 2.3.1 Khái niệm 
+Con trỏ đến dữ liệu hằng có các đặc điểm
+- Không được phép thay đổi giá trị 
+- Có thể đổi hướng con trỏ đến vùng nhớ khác 
+
+```c
+int a = 10, b = 20;
+const int *ptr = &a; // ptr trỏ đến a (giá trị 10)
+*ptr = 15;   // ❌ Lỗi – không được phép thay đổi dữ liệu qua ptr
+ptr = &b;    // ✅ Hợp lệ – ptr có thể trỏ sang b
+```
+**Note** : Không phải con trỏ là hằng mà giá trị mà nó trỏ tới là hằng 
+
+### 2.3.2 Ứng dụng
+Áp dụng
+- Đọc dữ liệu an toàn - ko cho phép ghi
+- Ví dụ : đọc giá trị từ thanh ghi IDR - Input Data Register 
+
+```c
+const uint32_t *pIDR = (uint32_t *)0x48000010; // Địa chỉ thanh ghi chỉ đọc GPIO
+uint32_t value = *pIDR; // chỉ đọc, không ghi
+```
+
+| Tình huống                | Khai báo                              | Mục đích                                   |
+| ------------------------- | ------------------------------------- | ------------------------------------------ |
+| Đọc giá trị cảm biến      | `const volatile uint32_t *pSensor`    | Giá trị thay đổi do cảm biến, code chỉ đọc |
+| Ghi điều khiển actuator   | `volatile uint32_t * const pActuator` | Ghi giá trị ra thanh ghi cố định           |
+| Cấu hình tham số hệ thống | `const uint8_t *pConfig`              | Chỉ đọc dữ liệu cấu hình trong Flash       |
+
+
+### 2.3.2 Kết hợp (const + volatile)
+Áp dụng khi 
+- không muốn thay đổi dữ liệu dựa trên logic code
+- Dữ liệu có thể được cập nhật bởi phần cứng 
+
+```c
+const volatile uint32_t *pSTATUS = (uint32_t *)0x40001000;
+```
+
+
 ## 2.4 Hằng con trỏ - Constant Pointer 
+### 2.4.1 Khái niệm 
+Con trỏ đến vùng địa chỉ cố định
+- Không được đổi hướng con trỏ một khi đã gán địa chỉ
+- Có thể thay đổi giá trĩ tại địa chỉ đó (trừ khi dữ liệu là hằng)
 
-## 2.5 Con trỏ hàm - Function Pointer
+### 2.4.2 Ứng dụng
+- Dùng khi khai báo con trỏ đại diện cho thanh ghi có địa chỉ cố định
+- Ví dụ : thanh ghi điều khiển CR - Control Register
 
-## 2.6 Con trỏ đến con trỏ - Pointer to Pointer
+```c
+volatile uint32_t * const pODR = (uint32_t *)0x48000014;  // Thanh ghi Output Data Register
+*pODR = 1; // ghi dữ liệu ra GPIO
+```
+## 2.6 Con trỏ hàm - Function Pointer
+
+## 2.6.1 Khái niệm 
+Con trỏ đến địa chỉ của hàm
+- Khi cần thao tác trên các hàm có định dạng giống nhau
+- Cho phép gọi nhiều hàm khác nhau có cùng prototype mà không cần viết if/else hoặc switch-case
+- Cú pháp : <return_type> (*func_ptr)(<data_type_1>,<data_type_2>);
+
+```c
+func_ptr = func;
+(*func_ptr)();   // hoặc func_ptr();
+```
+Ví dụ : 
+```c
+int add(int a, int b) { return a + b; }
+int (*op)(int, int) = add;
+printf("%d", op(2,3)); // Kết quả: 5
+```
+
+## 2.6.2 Ví dụ sử dụng nâng cao
+- Triển khai các hàm tính toán và thao tác qua con trỏ hàm bằng 3 cách
+
+```c
+void Tong(int a, int b)
+{
+    printf("%d + %d = %d\n", a, b, a + b);
+}
+void Hieu(int a, int b)
+{
+    printf("%d - %d = %d\n", a, b, a - b);
+}
+void Tich(int a, int b)
+{
+    printf("%d x %d = %d\n", a, b, a * b);
+}
+void Thuong(int a, int b)
+{
+    if (b != 0)
+        printf("%d / %d = %.2f\n", a, b, (float)a / b);
+    else
+        printf("value of b is invalid\n");
+}
+```
+
+### a) Trỏ tửng hàm
+```c
+int a = 12, b = 2;
+/* cach 1 */
+void (*func_ptr)(int,int) = NULL;
+func_ptr = Tong;
+func_ptr(a,b);
+
+func_ptr = Hieu;
+func_ptr(a,b);
+
+func_ptr = Tich;
+func_ptr(a,b);
+
+func_ptr = Hieu;
+func_ptr(a,b);
+```
+### b) Mảng con trỏ hàm
+```c
+int a = 12, b = 2;
+void (*funcArr[])(int,int) = {Tong,Hieu,Tich,Thuong};
+funcArr[0](a,b);
+funcArr[1](a,b);
+funcArr[2](a,b);
+funcArr[3](a,b);
+```
+### c) Truyền địa chỉ vào hàm tổng quát
+```c
+void Operator(void (*op)(int, int), int a, int b)
+{
+    op(a, b);
+}
+void main(){
+  int a = 12 , b = 3;
+  Operator(Tong, a, b);
+  Operator(Hieu, a, b);
+  Operator(Tich, a, b);
+  Operator(Thuong, a, b);
+}
+```
+## 2.6.3 Ứng dụng
+
+**Xử lý Ngắt** : CPU gọi ra hàm xử lý thủ tục ngắt __ISR__ tương ứng dựa trên địa chỉ trong __vector table__
+
+<p align = "center">
+<img width="500" height="250" alt="Image" src="https://github.com/user-attachments/assets/5a4a45bd-09c2-4bd6-8aa5-99efb92f0978" />
+
+**Task Scheduler - RTOS** : Mỗi task có con trỏ trỏ tới hàm thưc thi 
+
+## 2.7 Con trỏ đến con trỏ - Pointer to Pointer
+
+### 2.7.1 Khái niệm 
+
+Con trỏ đến địa chỉ của con trỏ khác, mà không trực tiếp trỏ tới dữ liệu. Khi ta cần thay đổi địa chỉ trỏ đến của 1 con trỏ thông qua con trỏ khác. 
+
+Ví dụ : khi thay đổi địa chỉ của con trỏ cấp 1, cần thông qua cấp 2.
+```c
+int **pp;  
+```
+=> Khi truyền vào hàm để thao tác, cần truyền địa chỉ của con trỏ cấp 1, Cho phép thao tác thông qua 1 con trỏ cấp cao hơn
+
+| Trường hợp                                                                                 | Mô tả                                                                  |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| 1️⃣ Muốn **thay đổi giá trị của con trỏ khác** từ trong hàm                                | Giúp “hàm con” có thể gán địa chỉ mới cho con trỏ “bên ngoài”          |
+| 2️⃣ Làm việc với **mảng con trỏ (pointer array)**                                          | Mỗi phần tử của mảng là 1 con trỏ, ví dụ `char *argv[]` trong `main()` |
+| 3️⃣ Khi cần **quản lý cấu trúc động phức tạp**, như danh sách, buffer 2D, hoặc bảng string |                                                                        |
+| 4️⃣ Trong **embedded**, dùng cho việc **phân tích buffer, frame hoặc chuỗi dữ liệu động**  |                                                                        |
+
+
+### 2.7.2 Ứng dụng và ví dụ thực tê
+
+Trong hệ thống nhúng khi làm việc với dữ liệu truyền qua các giao thức mạng, truyền thông - UART / CAN / Ethernet. Chuỗi nhận về có định dạng như JSON / UART string. Ví dụ như : "TEMP:28;HUM:65;" Do đó cần phân tách ra từng thành phần. Cụ thể bằng cách 
+- Viết các hàm xử lý chuỗi như strtok() hoặc parse JSON để trả về con trỏ tới từng token
+- Dùng double pointer để truyền/nhận các con trỏ đó 1 cách an toàn
+
+**Ví dụ - con trỏ đến vùng nhớ cấp phát động thông qua việc gọi hàm để xử lý**
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+void allocateBuffer(char **p)
+{
+    *p = (char *)malloc(20);  // gán địa chỉ vùng nhớ mới cho con trỏ bên ngoài
+    if (*p)
+        sprintf(*p, "Sensor OK");
+}
+
+int main(void)
+{
+    char *msg = NULL;
+    allocateBuffer(&msg);  // truyền địa chỉ của con trỏ -> double pointer nhận
+
+    printf("%s\n", msg);   // In ra: Sensor OK
+
+    free(msg);
+    return 0;
+}
+```
+
+**Ví dụ - Phân tích chuỗi dữ liệu UART**
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+void parseUART(char *rx, char **temp, char **hum)
+{
+    *temp = strtok(rx, ";");  // con trỏ tới "TEMP=27"
+    *hum  = strtok(NULL, ";"); // con trỏ tới "HUM=63"
+}
+
+int main(void)
+{
+    char buffer[] = "TEMP=27;HUM=63;";
+    char *t, *h;
+
+    parseUART(buffer, &t, &h);
+
+    printf("%s | %s\n", t, h);  // In ra: TEMP=27 | HUM=63
+}
+```
+
