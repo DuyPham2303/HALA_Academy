@@ -3,7 +3,7 @@
 - Kiểu dữ liệu do người dùng định nghĩa, cho phép nhóm nhiều biến thuộc nhiều kiểu khác nhau lại thành 1 kiểu dữ liêu mới để đại diện cho 1 thực thể (đối tượng cụ thể)
 
 
-### 1.1 Tãi sao cần có struct ? 
+### 1.1 Tại sao cần có struct ? 
 - Tưởng tượng ta cần quản lý các thông tin để mô tả của sinh viên như sau
 ```c
 char name[30];
@@ -18,8 +18,8 @@ char major[20];
 
 __Giải pháp tối ưu là gộp tất cả các thông tin trên vào vị trí duy nhất để dễ dàng quản lý bằng cách sử dụng struct keyword__
 
-### 1.2 Liên hẹ thực tế trong hệ thống nhúng 
-- Thông thườn cần quản lý nhiều loại dữ liệu, tín hiệu từ các thực thể, đối tượng khác nhau ví dụ 
+### 1.2 Liên hệ thực tế trong hệ thống nhúng 
+- Thông thường cần quản lý nhiều loại dữ liệu, tín hiệu từ các thực thể, đối tượng khác nhau ví dụ 
 
 | Nhóm đối tượng | Ví dụ               | Đặc điểm                                                                      |
 | -------------- | ------------------- | ----------------------------------------------------------------------------- |
@@ -90,7 +90,44 @@ Sensor_t Data = { .time = 1, .temp = 30.5, .humidity = 40 };
 ```
 `Note:` các kiểu struct được tạo ra nên được thêm đuôi `_t` hoặc `Type` để đánh dấu đây là 1 kiểu dữ liệu (ví dụ thư viên __stdint.h__)
 
-** d) **
+**d) *Tag name - tên tham chiếu**
+
+__Ý NGHĨA__
+
+- Khi khai báo 1 struct, ta có thể đặt __tag name__ tức là tên định danh, mà ta có thể dùng lại sau này để tham chiều đến kiểu struct đó.
+
+```c
+struct Student{
+    char name[20];
+    int id;
+}
+```
+Với: 
+    + Student là `tag name`
+    + kiểu struct đầy đủ `struct Student`
+
+- Nếu không có `tag name`, nên để sử dụng được cần thông qua alias  `Student` được tạo bởi typedef 
+```c
+typedef struct {
+    char name[30];
+    int id;
+} Student;
+```
+
+__DÙNG KHI NÀO ?__
+
++ Trường hợp trong struct có chứa member trỏ đến chính kiểu của nó - ví dụ linked list
+
+```c
+struct Node {
+    int data;
+    struct Node *next;
+};
+```
++ Struct Node ở trong ? : vì ở dòng khai báo `next` , kiểu `struct Node` chưa hoàn chỉnh, nên cần khai báo con trỏ tới chính nó - chứ không thể khai báo kiểu `Struct Node`
++ Khi compiler đọc đến dòng đầu -> tạo ra tên định danh là `Node` chưa đầy đủ 
++ Khi compiler đọc đến dòng (struct Node *next;),  biết rằng có một kiểu tên Node tồn tại, nên cho phép khai báo con trỏ tới kiểu này, dù struct chưa hoàn chỉnh 
+
 
 ## 2. Bản chất của struct so với biến thông thường 
 ### 2.1 Điểm giống 
@@ -132,18 +169,18 @@ int main() {
     + chính vì vậy nếu truyền kiểu `pass by value` sẽ chiếm bộ nhớ khá lớn trên Stack segment của RAM
     + Do vậy việc truyền kiểu `pass by reference` thường được thay thế để giảm thiểu tiêu tốn bộ nhớ stack
 
-## 2 Struct Alignment Padding
+## 3 Struct Alignment Padding
 
-### 2.1 Vấn đề khi làm việc với struct 
+### 3.1 Vấn đề khi làm việc với struct 
 - Ta cần quan tâm đến việc tối ưu bộ nhớ khi quản lý các member được khai báo bên trong struct để tránh lãng phí tài nguyên hệ thống __(có hạn đối với embedded system)__ , 
 - Điều này liên quan đến cách sắp xếp các phần tử của struct 
 
-### 2.2 Cách thức truy cập bộ nhớ của CPU 
+### 3.2 Cách thức truy cập bộ nhớ của CPU 
 - Khi làm việc với struct, CPU không đọc từng biến một, mà đọc theo đơn vị truy cập tự nhiên `natural unit`
-    + `Natural unit` : là kích thước dữ liệu mà CPU xử lý hiệu quả nhất trong một lần đọc hoặc ghi.
+    + __Natural unit__ : là kích thước dữ liệu mà CPU xử lý hiệu quả nhất trong một lần đọc hoặc ghi.
 - Cách CPU truy cập bộ nhớ vật lý phụ thuộc vào memory cycle và bus width 
-    + `memory cycle - chu kỳ máy `: số lần CPU / bus phải đọc từ RAM để lấy đủ dữ liệu 
-    + `Bus width - độ rộng bus` : số bit dữ liệu mà nó thể đọc/ghi trong 1 lần truy xuất (ví dụ 32-bit => 4 byte/cycle)
+    + __memory cycle__ - chu kỳ máy `: số lần CPU / bus phải đọc từ RAM để lấy đủ dữ liệu 
+    + __Bus width - độ rộng bus__ : số bit dữ liệu mà nó thể đọc/ghi trong 1 lần truy xuất (ví dụ 32-bit => 4 byte/cycle)
 
 ### 2.3 Khái niệm Data Alignment trên Memory
 
@@ -152,14 +189,14 @@ int main() {
 
 **b) Tại sao cần có Alignment ?**
 - Alignment phụ thuộc vào kiến trúc của bộ vi xử lý 
-    + `trên MCU` : quyết định CPU xử lý được độ rộng của 1 hay nhiều word phụ thuộc vào kích thước của bus dữ liệu (ví dụ trên ARM-CORTEX M4 xử lý được tối đa là 1 word - 4 byte) 
-    + `trên PC` : bus width tối đa truy cập được dựa trên 
+    + __trên MCU__ : quyết định CPU xử lý được độ rộng của 1 hay nhiều word phụ thuộc vào kích thước của bus dữ liệu (ví dụ trên ARM-CORTEX M4 xử lý được tối đa là 1 word - 4 byte) 
+    + __trên PC__ : bus width tối đa truy cập được dựa trên 
         - x86 - 64 : 8-byte 
         - x86 - 32 : 4 byte
 <p align = "center">
-<img width="750" height="650" alt="Image" src="https://github.com/user-attachments/assets/1a6717a4-15a7-4fde-b8bf-88e534dcbc97" />
+<img width="550" height="450" alt="Image" src="https://github.com/user-attachments/assets/1a6717a4-15a7-4fde-b8bf-88e534dcbc97" />
 
-**Banked Memory ** Bộ nhớ được chia thành các vùng lưu trữ dữ liệu riêng biệt, và song song với nhau  
+**Banked Memory** Bộ nhớ được chia thành các vùng lưu trữ dữ liệu riêng biệt, và song song với nhau  
 
 - Ảnh hưởng của việc đặt 1 word = 4 byte có thể thấy đó là 
     + truy xuất đến bộ nhớ nhanh hơn
@@ -180,10 +217,10 @@ typedef struct{
 __=> Dẫn đến việc truy xuất đến b có thể tốn 2 memory cycle, vì vậy yêu cầu các member cần được căn chỉnh để đảm bảo CPU có thể tối ưu tốc độ truy xuất__
 
 <p align = "center">
-<img width="909" height="172" alt="Image" src="https://github.com/user-attachments/assets/10840370-2d74-4709-8373-d807375bf931" />
+<img width="700" height="400" alt="Image" src="https://github.com/user-attachments/assets/10840370-2d74-4709-8373-d807375bf931" />
 
 **c) Alignment diễn ra như thế nào ?**
-- Các biến có kích thước n byte sẽ được đặt vào các ô nhớ ó địa chỉ chia hét cho n
+- Các biến có kích thước n byte sẽ được đặt vào các ô nhớ ó địa chỉ chia hết cho n
     + Các số 4 byte được đặt vào Bank 0,1,2,3
     + Các số 2 byte được đật vào Bank 0,1 hoặc 2,3
     + Các số 1 byte được đặt ở bất kỳ Bank nào
@@ -215,15 +252,14 @@ typedef struct{
 
 ### 2.4 Vấn đề với padding byte
 - Việc săp xếp các phần tử nhu trên sẽ có 1 vài rủi ro
-    + Tốn bộ nhớ : mặc dù tốc độ truy cập được tối ưu, nhưng gây phát sinh các byte dư thừa, gây tốn bộ nhớ
+    + __Tốn bộ nhớ :__ mặc dù tốc độ truy cập được tối ưu, nhưng gây phát sinh các byte dư thừa, gây tốn bộ nhớ
 
-    + sai lệch khi truyền/nhận dữ liệu : Khi cần truyền qua chuẩn truyền thông, dữ liệu sẽ truyền theo từng byte, Nếu 2 bên không thống nhất về Alignment có thể dẫn đến dữ liệu bị nhận sai
+    + __Sai lệch khi truyền/nhận dữ liệu :__ Khi cần truyền qua chuẩn truyền thông, dữ liệu sẽ truyền theo từng byte, Nếu 2 bên không thống nhất về Alignment có thể dẫn đến dữ liệu bị nhận sai
     
 __Ví dụ STM32F4 và PC giao tiếp qua UART, cần truyền struct data__
-    + STM32F4 : có Alignment tự nhiên là 4 byte 
-        -> sizeof(Sensor) = 12 bytes
-    + PC (x86): có Alignment tự nhiên là 8 byte 
-        -> sizeof(Sensor) -> 16 bytes
+
+    + STM32F4 : có Alignment tự nhiên là 4 byte -> sizeof(Sensor) = 12 bytes
+    + PC (x86): có Alignment tự nhiên là 8 byte -> sizeof(Sensor) -> 16 bytes
 ```c
 typedef struct {
     uint8_t   A;
@@ -231,7 +267,7 @@ typedef struct {
 }data;
 ```
 
-=> Dẫn đến nếu truyền dữ liệu từ STM32F4 sang PC hoặc ngược lại thì số byte sẽ bị lệch (thiếu byte)
+__=> Dẫn đến nếu truyền dữ liệu từ STM32F4 sang PC hoặc ngược lại thì số byte sẽ bị lệch (thiếu byte)__
 
 ### 2.5 Khái niệm struct packing 
 - Trong một số trường hợp ta sẽ cần tránh Alignment - padding như kể trên. Chính vì vậy hầu hết các compiler đều hỗ trợ tiện ích để tắt phần padding măc định 
@@ -256,10 +292,10 @@ struct name {
 } __attribute__((packed));
 ```
 
-** b) Cú pháp nâng cao puch/pop**
+**b) Cú pháp nâng cao puch/pop**
 ....
 
-** c) Trường hợp áp dụng việc loại bỏ padding 
+**c) Trường hợp áp dụng việc loại bỏ padding**
 
 `Lưu ý sử dụng thưc tế`
 
