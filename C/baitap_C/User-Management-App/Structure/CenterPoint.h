@@ -11,6 +11,7 @@
  ******************/
 #ifndef CENTERPOINT_H
 #define CENTERPOINT_H
+
 /*
  * Định nghĩa cấu trúc CenterPoint để xây dựng cây nhị phân quản lý các node của linked list
  * left : nhánh con bên trái node gốc  

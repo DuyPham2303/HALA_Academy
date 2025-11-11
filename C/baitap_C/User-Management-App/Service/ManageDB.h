@@ -24,7 +24,7 @@ Status Load_UserDB(const char* filename);
  * @retval  E_OK    Hàm xử lý thành công
  * @retval  NOT_OK  Hàm xử lý thất bại
  */
-Status WriteFile(const char* filename);
+//Status WriteFile(const char* filename);
 /**
  * @brief   Hàm xóa dữ liệu của user đã lưu trữ
  * @retval  E_OK    Hàm xử lý thành công

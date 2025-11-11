@@ -29,6 +29,7 @@ void cleanup_worker(void* arg){
     OsTaskCtrl* const s = (OsTaskCtrl*)arg;
     printf("%s done reclaim resources\n",s->name);
     pthread_mutex_destroy(&s->mx);
+    s->tid = (pthread_t)0;
 }
 
 // Thread worker: làm 1 việc rồi dừng
@@ -86,6 +87,7 @@ int main() {
     pthread_t sched;
     pthread_mutex_t main_mx;
     pthread_mutex_init(&main_mx,NULL);
+
     if (pthread_create(&sched, NULL, scheduler_thread, NULL) != 0) {
         perror("pthread_create scheduler failed");
         return 1;
@@ -94,12 +96,14 @@ int main() {
     pthread_detach(sched);
 
     //mô phỏng luồng chính cập nhật dữ liệu từ task_sensor
-    while(running){
+    while(atomic_load(&running)){
+        pthread_mutex_lock(&main_mx);
         printf("[main thread] dữ liệu cập nhật từ %s : %d\n",Os_ConfigTable.name,atomic_load(&updated_sensor));
         pthread_mutex_unlock(&main_mx);
         sleep(1);
     }
 
+    pthread_mutex_destroy(&main_mx);
     printf("[Main Os] : Terminated\n");
 
     return 0;

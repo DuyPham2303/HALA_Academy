@@ -1,5 +1,15 @@
 #include <stdio.h>
+/* 
+   "temp : 23
+    humi : 45
+    device : stm32/esp32/arduino
+    sensor : dht11"
+*/
 
+int value; 
+char str[12];
+void parsestring();
+void parsenumber();
 int main()
 {
     int value = 42;
@@ -9,7 +19,7 @@ int main()
     /*
         **ptr2 = &ptr1
         ptr2 = &ptr1;
-        *ptr2 = ptr1 = &value;
+        *ptr2 = ptr1 = *(&value);
         **ptr2 = *ptr1 = value
     */
 

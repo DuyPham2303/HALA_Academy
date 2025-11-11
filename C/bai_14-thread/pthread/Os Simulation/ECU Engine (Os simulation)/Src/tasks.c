@@ -89,3 +89,7 @@ void task_diagnostic() {
         //printf("[Task_diagnostic] is running\n");
     }
 }
+
+void task_CAN(){
+    
+}

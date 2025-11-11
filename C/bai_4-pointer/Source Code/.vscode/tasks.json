@@ -7,14 +7,15 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "-Wall",
-                "-Warray-bounds",
-                "-Werror",
-                "-Wextra",
+                //"-Wall",
+                //"-Warray-bounds",
+                //"-Werror",
+                 "-Wextra",
                 "-std=c17",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                //"${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}/run.exe",
             ],
             "options": {
                 "cwd": "${fileDirname}"

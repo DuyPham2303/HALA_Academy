@@ -24,7 +24,7 @@ typedef enum
 
 /* GIÁ TRỊ QUY ĐỔI */
 /*
-    dec 	hex	    bin
+    dec hex	    bin
     1	0x01	1 << 0
     2	0x02	1 << 1
     4	0x04	1 << 2

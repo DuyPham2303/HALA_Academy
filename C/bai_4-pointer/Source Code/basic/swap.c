@@ -1,29 +1,32 @@
 #include <stdio.h>
 
-//pass by pointer
-void swap(int *pa, int *pb) //pa: 0xa0 , pb : 0xa8
+
+void swap(int *pa, int *pb) //0xb1 : 0x04 , 0xb8 : 0x08
 {
     int tmp = *pa;   //temp = 23 
-    *pa = *pb;       //*a = 12 -> giá trị tại 0x04 =  12
-    *pb = tmp;       //*b = 23 -> giá trị tại 0x08 = 23
-    //kết thúc hàm
-    //thu hồi 0x04 và 0xa8
+    *pa = *pb;       //*a = 12 (0x04)
+    *pb = tmp;       //*b = 23 (0x08)
 } 
 
-//pass by value
-void swap(int a,int b){ //a: 0xa0 , b : 0xa8
+void swap(int a,int b){ //0xa0 : 23 , 0xa8 : 12
     int tmp = a; //temp = 23 
-    a = b;       //a = 12 -> giá trị tại 0xa0 =  12
-    b = tmp;     //b = 23 -> giá trị tại 0xa8 =  23
-    //kết thúc hàm
-    //thu hồi 0x04 và 0xa8
+    a = b;       //a = 12 (0xa0)
+    b = tmp;     //b = 23 (0xa8)
+
+    //if(a == 3 && b < 21)
 }
 
+void input(int *a , int* b){
+    scanf("%d",a);
+    scanf("%d",b);
+}
 int main(){
-    int a = 23; // a(0x04) : 23
-    int b = 12; // a(0x08) : 12 
+    int a = 23; // 0x04
+    int b = 12; // 0x08
 
-    swap(&a,&b); //truyền 0x04 và 0x08
+    input(&a,&b);
+    
+    swap(&a,&b); // 0x04 , 0x08
 
     printf("a:%d\tb:%d\n",a,b); 
     return 0;

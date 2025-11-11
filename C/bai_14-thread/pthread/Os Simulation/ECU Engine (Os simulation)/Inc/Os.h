@@ -31,5 +31,6 @@ void task_sensor();
 void task_enginecontrol();
 void task_actuator();
 void task_diagnostic();
+void task_CAN();
 
 #endif 
