@@ -16,7 +16,7 @@ char major[20];
 
 __Giải pháp tối ưu là gộp tất cả các thông tin trên vào vị trí duy nhất để dễ dàng quản lý bằng cách sử dụng struct keyword__
 
-### 1.2 Liên hệ thực tế trong hệ thống nhúng 
+## 1.2 Liên hệ thực tế trong hệ thống nhúng 
 - Thông thường cần quản lý nhiều loại dữ liệu, tín hiệu từ các thực thể, đối tượng khác nhau ví dụ 
 
 | Nhóm đối tượng | Ví dụ               | Đặc điểm                                                                      |
