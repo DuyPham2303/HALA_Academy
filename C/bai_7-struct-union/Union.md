@@ -164,12 +164,15 @@ int main() {
 ```
 
 __Giải thích cụ thể__
-    + `UART_CR_BITS_t` : định nghĩa cấu trúc Bitfield cho từng trường bit
-    + `UART_CR_REG_t` : cho phép truy cập thanh ghi dưới dạng byte hoặc bitfield
-    + `volatile` : ngăn compiler tối ưu hóa các thao tác trên thanh ghi phần cứng
+    
++ `UART_CR_BITS_t` : định nghĩa cấu trúc Bitfield cho từng trường bit
+
++ `UART_CR_REG_t` : cho phép truy cập thanh ghi dưới dạng byte hoặc bitfield
+
++ `volatile` : ngăn compiler tối ưu hóa các thao tác trên thanh ghi phần cứng
 
 
-    => Bằng cách trên ta không cần phải định nghĩa các macro mặt nạ bit và áp dụng các phép toán bitwise phức tạp để thao tác trên các bit của thanh ghi
+__=> Bằng cách trên ta không cần phải định nghĩa các macro mặt nạ bit và áp dụng các phép toán bitwise phức tạp để thao tác trên các bit của thanh ghi__
 
 
 # 3. Ưu và nhược điểm
@@ -183,3 +186,125 @@ __Giải thích cụ thể__
 
 
 # 4. Struct vs Union  
+
+<p align = "center">
+<img width="650" height="500" alt="Image" src="https://github.com/user-attachments/assets/d9e1041c-73c7-4255-9961-be5e0b9889bf" />
+
+## 4.1 So sánh tổng quát theo các tiêu chí 
+
++ **Bộ nhớ cấp phát**
+    - `Struct` : từng member có vị trí bộ nhớ riêng
+    - `Union`  : tất cả member chia sẻ chung vị trí bộ nhớ 
++ **Kích thước** 
+    - `Struct` : total size of members + padding 
+    - `Union`  : size of largest member 
++ **Truy cập**
+    - `Struct` : có thể truy cập độc lập từng member 
+    - `Union`  : chỉ truy cập được 1 member tai 1 thời điểm 
++ **Mục đích** 
+    - `Struct` : gộp nhiều kiểu khác nhau để truy cập đồng thời 
+    - `Union`  : Khi cần
+        + optimize memory
+        + access từng member tại các thời điểm khác nhau
+        + access dữ liệu ở các định dạng khác nhau 
+
+## 4.2 Trường hợp cụ thể dùng struct 
+- Truy cập nhiều thông tin một lúc của các đối tương như
+    + Sinh viên (mssv,name,age,major,gpa)
+    + tọa độ (x,y,z)
+    + Giá trị cảm biến (timestamp,temperature,humidity,sensorId)
+```c
+struct SensorReading {
+	uint32_t timestamp;	// Reading time
+	float temperature; 	// Temperature
+	float humidity; 	// Humidity
+	uint8_t sensorId; 	// Sensor ID
+};
+// All of this information is needed and accessed at the same time for each reading.
+```
+
+    + __Rõ ràng và an toàn__ : do mỗi member là độc lập, hạn chế rủi ro về lỗi __undefined behaviour__ do access sai dữ liệu. Do đó code trở nên
+
+=> Dễ hiểu, dể đọc, dễ bảo trì
+
+    + __Yêu cầu về truyền dữ liệu dưới dạng block__ : định dạng tiêu chuẩn cho  
+        + các gói tin truyền thông `UART` , `SPI` , `I2C`
+        + các bản ghi trong FLASH
+        + Cấu trúc dữ liệu phức tạp
+
+## 4.3 Trường hợp cụ thể dùng Union
+- __Khi cần tiết kiệm bộ nhớ__ : 
+    + Lưu nhiều loại datatype khác nhau
+    + Tại 1 thời điểm chỉ cần lưu 1 trong số chúng
+    + Union giúp giảm đáng kể số lượng bộ nhớ sử dụng 
+
+```c
+// For example, a message can be either sensor data or a control command,
+// but not both.
+enum MessageType {
+	SENSOR_DATA_MSG,
+	CONTROL_CMD_MSG
+};
+
+struct Message {
+	enum MessageType type;
+	union {
+		struct {
+			float temperature;
+			float humidity;
+		} sensorData;
+		struct {
+			uint8_t commandId;
+			uint16_t value;
+		} controlCmd;
+	} payload; // payload
+};
+// The size of the 'payload' will be the size of the larger structure (sensorData or controlCmd),
+// rather than the sum of both if using a struct.
+```
+- __Truy cập 1 vùng bộ nhớ với nhiều kiểu khác nhau__   
+    + Union cho phép chuyển đổi linh hoạt giữa nhiều kiểu khác nhau
+    + Hữu ích khi áp dụng thao tác với dữ liệu truyền thông ở cấp độ bit (packing/unpacking) 
+    + Tránh việc tốn thời gian xử lý ép kiểu
+
+```c
+// Example: Convert a 32-bit integer to 4 separate bytes
+union U32Bytes {
+	uint32_t value;
+	uint8_t bytes[4];
+};
+
+void send32BitValue(uint32_t data) {
+	union U32Bytes packet;
+	packet.value = data; // Assign a 32-bit value
+	// Now we can send each byte to the serial port
+	send_byte(packet.bytes[0]);
+	send_byte(packet.bytes[1]);
+	send_byte(packet.bytes[2]);
+	send_byte(packet.bytes[3]);
+	// Note: Byte order depends on the Endianness of the system
+}
+```
+
+- __Tổ chức thanh ghi MCU__ :
+    + Thao tác với các trường bit khác nhau trên thanh ghi tương tự như các bitmask 
+    + Thuận tiện hơn trong việc truy cập đọc/ghi theo từng bit hoặc word khi kết hợp với bitfield 
+
+```c
+/**
+  \brief  Union type to access the Application Program Status Register (APSR).
+ */
+typedef union
+{
+  struct
+  {
+    uint32_t _reserved0:27;              /*!< bit:  0..26  Reserved */
+    uint32_t Q:1;                        /*!< bit:     27  Saturation condition flag */
+    uint32_t V:1;                        /*!< bit:     28  Overflow condition code flag */
+    uint32_t C:1;                        /*!< bit:     29  Carry condition code flag */
+    uint32_t Z:1;                        /*!< bit:     30  Zero condition code flag */
+    uint32_t N:1;                        /*!< bit:     31  Negative condition code flag */
+  } b;                                   /*!< Structure used for bit  access */
+  uint32_t w;                            /*!< Type      used for word access */
+} APSR_Type;
+```
