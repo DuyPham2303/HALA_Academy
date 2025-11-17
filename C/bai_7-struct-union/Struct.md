@@ -1,4 +1,4 @@
-# 1 Các khải niệm cơ bản 
+# 1 Các khái niệm cơ bản 
 - Kiểu dữ liệu do người dùng định nghĩa, cho phép nhóm nhiều biến thuộc nhiều kiểu khác nhau lại thành 1 kiểu dữ liêu mới để đại diện cho 1 thực thể (đối tượng cụ thể)
 
 ## 1.1 Tại sao cần có struct ? 
@@ -337,7 +337,117 @@ struct name {
 | Lưu trữ cấu trúc vào file nhị phân (firmware, EEPROM, flash)      | ✅        |                |
 | Xử lý nội bộ trong RAM (các biến tính toán thường xuyên)          |          | ❌              |
 
-## 5. Struct bit field 
+# 5. Struct bit field 
 
+## 5.1 Bối cảnh 
 
+- Ta cần biết rằng bản chất của việc lập trình Embedded,chính là thao tác với các thanh ghi phần cứng và quản lý bộ nhớ hạn chế. Chính vì vậy ta cần có 1 công cụ giúp hỗ trợ 
+    + tối ưu hiệu suất xử lý
+    + đơn giản hóa thao tác với dữ liệu cấp bit 
+
+**Vấn để : quản lý và lưu trữ trạng thái của nhiều đối**
+- Ví dụ ta có hệ thống điều khiển 8 đèn LED, mỗi bóng chỉ cần 1 bit để lưu trạng thái (on/off). Nếu sử dụng char(1 byte) cho từng LED, dẫn đến các vấn đề sau 
+
+__a) Lãng phí RAM__
+
+```c
+char led1_state; // 1 byte
+char led2_state; // 1 byte
+// ...
+char led8_state; // 1 byte
+```
+- Ta thấy rõ đối với mỗi thông tin cần 1 byte lưu trữ, thoạt nhìn có vẻ là không đáng kể, tuy nhiên trong hệ thống thực tế số lượng thông tin cần lưu trữ có thể đến hàng trăm, ngàn loại khác nhau. Vì vậy không thích hợp đối với hệ thống có RAM hạn chế 
+
+__b) Bitwise phức tạp__
+
+```c
+unsigned char all_led_states = 0x00; // 1 byte cho 8 đèn
+
+// Bật LED 3 (bit 2)
+all_led_states |= (1 << 2);
+
+// Kiểm tra LED 5 (bit 4)
+if (all_led_states & (1 << 4)) {
+    // LED 5 đang bật
+}
+
+// Tắt LED 1 (bit 0)
+all_led_states &= ~(1 << 0);
+```
+- Cách trên tiết kiệm bộ nhớ, tuy nhiên vẫn có 1 số vấn đề 
+    + mã nguồn khó đọc, 
+    + dễ lỗi nếu không nắm rõ kiến thức về bitwise 
+    + tốn thời gian debug 
+
+### 5.1.2 Giới thiệu bitfield 
+- Chỉ định số lượng bit cụ thể dùng để lưu trữ một biến số nguyên. Thay vì sử dụng toàn bộ kích thước của một kiểu dữ liệu, bạn có thể “cắt nhỏ” bộ nhớ theo số bit cần thiết, giúp tiết kiệm không gian bộ nhớ và mô tả chính xác hơn ý nghĩa của dữ liệu (ví dụ: lưu trạng thái bật/tắt chỉ cần 1 bit).
+
+### 5.2.3 Khai báo và sử dụng 
+
++ `Cú pháp`
+    + **kieu_du_lieu** : thường là unsigned_int, unsigned_char (tránh vấn đề về dấu)
+    + **ten_thanh_vien** : tên của bitfield member
+    + **so_bit** : số bit dành cho member, phải nhỏ hơn / bằng size của datatype 
+
+```c
+struct TenStruct {
+    kieu_du_lieu ten_thanh_vien_1 : so_bit_1;
+    kieu_du_lieu ten_thanh_vien_2 : so_bit_2;
+    // ...
+};
+```
+
+__Ví dụ :__ Quản lý trạng thái thiết bị - cho vấn đề đã đề cập bên trên
+```c
+struct DeviceStatus {
+    unsigned char led_1  : 1;
+    unsigned char led_2  : 1;
+    unsigned char led_3  : 1;
+    unsigned char led_4  : 1;
+    unsigned char led_5  : 1;
+    unsigned char led_6  : 1;
+    unsigned char led_7  : 1;
+    unsigned char led_8  : 1;
+} LED_t;
+```
+
+### 5.1.4 đặc điểm 
+- chỉ áp dụng cho member khai báo trên struct 
+- Không thể truy xuất địa chỉ của member (do kích thước bị chia nhỏ)
+- Các bitfield có cùng datatype được compiler gộp thành 1 vùng nhớ nhằm tiết kiệm bộ nhớ 
+- Các bitfield khác kiểu sẽ nằm ở các vùng nhớ riêng để đảm bảo alignment.
+
+## 5.2 Lưu trữ trên bộ nhớ  
+
+### 5.2.1 Các bitfield có cùng datatype
+
+__Ví dụ:__ Cấp phát 1 byte chung cho các union members
+
+<p align = "center">
+<img width="850" height="450" alt="Image" src="https://github.com/user-attachments/assets/87775217-ee17-4b47-98d0-f2aeb53ec87e" />
+
+__Ví dụ:__ Cấp phát 2 byte chung cho các union members
+
+<p align = "center">
+<img width="850" height="450" alt="Image" src="https://github.com/user-attachments/assets/8381f914-feb5-4118-a731-9fe34d6ee2ed" />
+
+__NOTE__ : Đối với vùng nhớ chung lưu trữ các bitfield cùng datatype nếu vượt quá kích thước mà chứa được thì cũng sẽ được cấp phát mới 
+
+### 5.2.2 Các bitfield khác datatype 
+
+<p align = "center">
+<img width="850" height="450" alt="Image" src="https://github.com/user-attachments/assets/c2e36d1b-c5ee-4c5f-8e74-05c9d2da9310" />
+
+### 5.3 Tóm tắt ưu và nhược điểm
+
+| **Tiêu chí**                            | **Ưu điểm (Benefits)**                                                                              | **Nhược điểm (Limitations)**                                                                                                                     |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tối ưu bộ nhớ**                       | • Gom nhiều cờ nhỏ vào chung 1 byte/word. <br>• Giảm lãng phí RAM trên MCU.                         | • Trình biên dịch có thể thêm padding → struct lớn hơn mong đợi.                                                                                 |
+| **Dễ đọc & dễ bảo trì**                 | • Truy cập bằng tên rõ ràng: `motor_on`, `error_code`. <br>• Tránh phải viết mask & shift thủ công. | • Không thể dùng địa chỉ trực tiếp: `&obj.bit` **không hợp lệ**.                                                                                 |
+| **Thao tác trực quan**                  | • Gán/đọc bit như biến thường (`flag.enable = 1`). <br>• Giảm lỗi thao tác bit thủ công.            | • Hiệu suất đôi khi giảm: compiler phải tạo mã mask/shift ngầm.                                                                                  |
+| **Ánh xạ thanh ghi phần cứng**          | • Rất phù hợp mô tả thanh ghi: các bit status, control. <br>• Mã rõ ràng khi điều khiển HW.         | • Cần theo dõi kiến trúc CPU: endian + packing khác nhau giữa compiler.                                                                          |
+| **Tính di động (portability)**          | • Dễ biểu diễn cấu trúc logic các bit.                                                              | • **Không portable**: thứ tự bit, cách đóng gói phụ thuộc compiler & kiến trúc. <br>• Không thích hợp cho dữ liệu truyền giữa các MCU khác nhau. |
+| **Kiểu dữ liệu**                        | • Cho phép mô tả rõ số bit cần dùng.                                                                | • Nên dùng `unsigned` để tránh rắc rối về bit sign-extend hoặc hành vi không mong muốn.                                                          |
+| **Định nghĩa giao thức/format dữ liệu** | • Thuận lợi mô tả layout logic của payload.                                                         | • Nhưng **không phù hợp để gửi qua mạng/MCU** vì layout phụ thuộc compiler.                                                                      |
+| **Khai báo và quản lý cấu trúc**        | • Tạo khuôn dạng dữ liệu gọn, rõ ý nghĩa.                                                           | • Cần hiểu rõ kiểu của từng phần tử để tránh mismatch giữa machine word và số bit khai báo (sẽ đề cập thêm trong video của bạn).                 |
 
