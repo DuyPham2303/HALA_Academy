@@ -1,44 +1,83 @@
-# Memory layout
-là phân vùng bố trí vùng nhớ của dữ liệu 1 chương trình được lưu trữ trên RAM khi ta tải chương trình lên. Nó sẽ chia làm 5 phần.
+# 1. Tổng quan về Memory lauout
+## 1.1 Bối cảnh 
+- Khi triển khai trên 1 hệ thống nhúng, ngoài việc đảm bảo code chạy đúng như yêu cầu, ta cần phải quan tâm đến các khía cạnh khác như
+	+ Hiệu suất và tốc độ xử lý có tối ưu chưa
+	+ Dung lượng lưu trữ có đủ để hệ thống có thể sử dụng
+
+=> Để quản lý tốt được bộ nhớ hạn chế của hệ thống nhúng , ta cần hiểu rõ được đặc điểm của các phân vùng lưu trữ trên RAM, từ đó có thể lựa chọn và sử dụng cho hợp lý nhằm tránh lãng phí tài nguyên và sử dụng bộ nhớ 1 cách tối ưu. Do đó cần nắm rõ kiến thức về memory layout - sơ đồ tổ chức bộ nhớ
+
+## 1.2 Khái niệm và bản chất 
+- Sơ đồ tổ chức bộ nhớ, mô tả 
+  	+ các vùng bộ nhớ mà mã máy __(machine code)__ và biến sẽ được đặt ở đâu khi chương trình chạy
+  	+ cách mà file thực thi tổ chức thành các section như `.text` , `.data` , `.bss` , `.rdata`
+- file thực thi có định dạng tùy hệ thống
+  	+ window : .exe (lưu ở SSD)
+  	+ Linux/MCU ARM : .exe 
+  	+ MCU 8-bit/32-bit : .hex   
+## 1.3 Quy trình xử lý sau khi load FILE thực thi lên RAM 
+### 1.3.1 Trên PC (Window/Linux)
+
+<p align = "center">
+<img width="650" height="300" alt="Image" src="https://github.com/user-attachments/assets/6e05a11a-d607-4fb4-8537-5115582d970a" />
+
++ Os loader đọc file thực thi và map các segment vào RAM
++ Os ánh xạ virtual address thông qua MMU sang physic address  
++ Program counter bắt đầu thực thi từ main()
+### 1.3.2 Trên MCU 
++ CPU truy cập trực tiếp .text và .rdata từ Flash __(ko copy xuống RAM)__
++ StartUp code tiến hành copy .data từ flash xuống RAM và zero hóa .bss => ko có MMU như trên PC, vì vậy MCU thường sử dụng địa chỉ tuyệt đối 
++ Gọi main() để bắt đầu program 
 
 <p align = "center">
 <img src = "https://github.com/user-attachments/assets/71fc9574-93e0-4cf0-a661-1d776b60a516" width = "500" height = "400">
 
 ## 1. Code segment
- Đây là phần vùng chỉ dọc mà không thể ghi dữ liệu, dùng để lưu:
- + các biến khai báo const
- + các chuỗi ký tự
- + mã lệnh thực thi của chương trình
+## 1.1 Bản chất 
+- Đây là nơi chứa mã nguồn thực thi của chương trình
+- Dữ liệu chỉ được đọc và thực thi, mà không được phép ghi (thay đổi)
+- chứa các section cụ thể như
+  	`.text` : chứa mã lệnh
+  	`.rdata`: chứa chuỗi hằng (string literal), các biến (const)
+## 1.2 Ví dụ 
 
-```bash
- const int a = 23;
- int main(){
-  a = 14; // wrong -> read-only
-  return 0;
- }
-```
-ví dụ trên là 1 minh họa của 1 biến được khai báo const, khi ta thực hiện thay đổi giá trị thì compiler sẽ báo lỗi ngay lập tức
-```bash
- char* str = "Hello world";
- int main(){
-  str[3] = 'y'; // wrong
-  return 0;
- }
-```
-Tương tự đối với trường hợp thay đổi nội dung của 1 chuỗi mà được trỏ tới bởi 1 con trỏ là không thể được
-## 2. DATA 
-dùng để đọc/ghi data, lưu trữ các biến: 
-+ khai báo (static/global) khác 0
+### a) char* str = "hello";
++ "hello" là chuỗi hằng , đặt vào .rdata (read-only data section)
++ str được lưu tùy vào vị trí khai báo
+  	+ global (toàn cục) : đặt trong .dara (hoặc .rdata tùy compiler)
+  	+ local  (cục bộ)   : đặt trong stack  
+### b) const char* str1 = "hello";
++ "hello" vẫn là chuỗi hằng trong .rdata
++ str1 là __pointer to const__ , nhưng bản thân nó vẫn trỏ tới địa chỉ khác được nên nằm trong .data 
+
+### c) char str2[] = "hello"
++ mảng str2[] được khởi tạo bằng chuỗi hằng => compiler copy chuỗi vào .data
++ Vì là mảng, nó không trỏ vào vùng dữ liệu hằng - literal, dữ liệu đã được copy
+
+### d) const char str3[] = "hello";
++ mảng nhưng là const => compiler đặt nó vào .rdata
++ str3 nằm trong .rdata
+
+### e) char* str4[] = {"hello", "my name", "is duy"};
++ str4[] là mảng con trỏ nằm trong .data
++ mỗi chuỗi nằm trong .rdata 
+
+## 2. DATA segment 
+### 2.1 Initialized data 
++ Lưu trữ biến global khởi tạo khác 0
++ Lưu trữ biến static (local + global) cũng khởi tạo khác 0
++ Quyền truy cập đọc/ghi
++ Địa chỉ cấp phát 1 lần cố định khi chương trình chạy 
 + vùng nhớ được thu hồi khi chương trình kết thúc
 ```bash
-int a = 23;        // lưu ở data segment
-static int b = 21; // lưu ở data segment
+int a = 23;        
+static int b = 21; 
   int main(){
-     static int c = 12; // lưu ở data segment
+     static int c = 12; 
      return 0;
   }
 ```
-### Lưu ý với struct
+__Lưu ý với struct__
+
 Khi ta khởi tạo 1 struct với các biến thành viên, khi chạy chương trình thì những biến này vẫn chưa được cấp phát vùng nhớ cho đến khi ta tạo ra biến struct 
 ```bash
 typedef struct{
@@ -47,37 +86,31 @@ typedef struct{
 }data;
 static data dt = {23,12}; // 2 member a và b của struct data lúc này mới được cấp phát vùng nhớ ở data segment
 ```
-## 3. BSS 
-Vùng nhớ dùng để đọc/ghi data,lưu các biến
-+ khai báo static/global được khởi tạo bằng 0, hoặc chưa gán giá trị (mặc định là 0)
+### 2.2 Uninitialized data - BSS  
++ Lưu trữ biến global chưa khởi tạo hoặc bằng 0
++ Lưu trữ biến static (local + global) chưa khởi tạo hoằc bằng 0
++ Quyền truy cập đọc/ghi
++ Địa chỉ cấp phát 1 lần cố định khi chương trình chạy 
 + vùng nhớ được thu hồi khi chương trình kết thúc
-Ta có ví dụ sau minh họa cho việc sử dụng BSS
+
 ```bash
  int a;        // global -> uninitialized  
  static int b; // static global -> uninitialized
  int c = 0;    // global -> intialized 0
  int main(){
   static int e; //local static -> uninitialized
-    printf("a:%d\n",a);
-    printf("b:%d\n",b);
-    printf("c:%d\n",c);
-    printf("c:%d\n",c);
   return 0;
  }
 ```
-Tất cả 4 biến trên khi in ra đều sẽ có giá trị bằng 0
-## 4. STACK
-+ Vùng nhớ được cấp phát tại thời điểm biên dịch và được giải phóng khi ra khỏi phạm vi được cấp phát
 
-__phân vùng dùng để lưu trữ:__
+## 3. STACK
++ Vùng nhớ được cấp phát tại thời điểm biên dịch và được giải phóng khi ra khỏi phạm vi được cấp phát. Dùng lưu trữ 
+	+ các biến khai báo cục bộ (local)
+	+ tham số hàm 
+	+ địa chỉ trả về của hàm 
++ Hoạt động theo cơ chế LIFO
++ Khi 1 hàm được gọi thì toàn bộ thông tin của hàm đó bao gồm các giá trị trên sẽ được push lên stack và cấp phát cho 1 vùng nhớ để lưu trữ và sẽ được giải phóng khi hàm thực thi xong. 
 
-+ các biến khai báo cục bộ (local)
-+ tham số hàm 
-+ địa chỉ trả về của hàm 
-+ Vùng nhớ được thu hồi khi hàm kết thúc theo cơ chế LIFO
-Khi 1 hàm được gọi thì toàn bộ thông tin của hàm đó bao gồm các giá trị trên sẽ được push lên stack và cấp phát cho 1 vùng nhớ để lưu trữ và sẽ được giải phóng khi hàm thực thi xong. 
-=> STACK có thể đọc/ghi data (tồn tại từ lúc cấp phát đến khi thoát khỏi hàm)
-+ Ví dụ dưới đây sẽ mô tả cách mà stack được gọi:
 ```bash
   void swap(int a,int b){
     int temp = a;
