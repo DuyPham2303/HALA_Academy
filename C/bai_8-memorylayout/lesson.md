@@ -12,7 +12,7 @@
   	+ cách mà file thực thi tổ chức thành các section như `.text` , `.data` , `.bss` , `.rdata`
 - file thực thi có định dạng tùy hệ thống
   	+ window : .exe (lưu ở SSD)
-  	+ Linux/MCU ARM : .exe 
+  	+ Linux/MCU ARM : .elf 
   	+ MCU 8-bit/32-bit : .hex   
 ## 1.3 Quy trình xử lý sau khi load FILE thực thi lên RAM 
 ### 1.3.1 Trên PC (Window/Linux)
@@ -25,7 +25,9 @@
 + Program counter bắt đầu thực thi từ main()
 ### 1.3.2 Trên MCU 
 + CPU truy cập trực tiếp .text và .rdata từ Flash __(ko copy xuống RAM)__
-+ StartUp code tiến hành copy .data từ flash xuống RAM và zero hóa .bss => ko có MMU như trên PC, vì vậy MCU thường sử dụng địa chỉ tuyệt đối 
++ StartUp code tiến hành copy .data từ flash xuống RAM và zero hóa .bss
+
+  => ko có MMU như trên PC, vì vậy MCU thường sử dụng địa chỉ tuyệt đối 
 + Gọi main() để bắt đầu program 
 
 <p align = "center">
