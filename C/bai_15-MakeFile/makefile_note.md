@@ -2,7 +2,7 @@
 ## 1.1 Biến tự động (Automatic Variables)
 
 ### 1.1.1 Các loại cơ bản
--   \*\*\$@*\*: Tên target hiện tại.
+-   **\$@**: Tên target hiện tại.
 -   **\$\<**: Prerequisite đầu tiên (thường dùng cho quy tắc compile
     `.c → .o`).
 -   **\$\^**: Danh sách tất cả prerequisites (loại trừ trùng lặp).
@@ -28,24 +28,22 @@ __→ `.o` và `.c` phải có cùng tên gốc.__
 
 ## 1.3 Sự khác nhau giữa `$<` và `$^`
 
-  Biến   Ý nghĩa                                     Dùng khi             Ví dụ
-  ------ ------------------------------------------- -------------------  -------------------
-  `$<`   chỉ lấy *một file prerequisites đầu tiên*   compile `.c → .o`    $(CC) -c -o $@ $<
-  `$^`   lấy *toàn bộ danh sách prerequisites*       linking              a.out: a.o b.o c.o
-                                                                          $(CC) $^ -o $@
+| Biến | Ý nghĩa                                          | Dùng khi              | Ví dụ |
+|------|--------------------------------------------------|------------------------|--------|
+| `$<` | Chỉ lấy **một file prerequisite đầu tiên**       | Compile `.c → .o`     | `$(CC) -c -o $@ $<` |
+| `$^` | Lấy **toàn bộ danh sách prerequisites**          | Linking               | `a.out: a.o b.o c.o`<br>`$(CC) $^ -o $@` |
 
-Nếu dùng `$^` thay `$<` trong quy tắc compile thì sai vì compile chỉ
-nhận 1 file input.
+> **Lưu ý:**  
+> Không được dùng `$^` thay `$<` trong quy tắc compile, vì compile chỉ nhận **một file input duy nhất**.
 
-------------------------------------------------------------------------
 
 ## 1.4 Pattern Rule 
 
 - Dùng để viết quy tắc tổng quát:
 - Cú pháp tổng quát 
 ```c
-    %.o: %.c
-        $(CC) -c -o $@ $<
+%.o: %.c
+    $(CC) -c -o $@ $<
 ```
 
 **% nghĩa là gì ?**
@@ -62,7 +60,7 @@ $(SOURCE_DIR)/%.o: $(SOURCE_DIR)/%.c
 - So khớp với rule `sr/%.o -> stem = main`
 - make tự suy ra dependencies src/main.c 
 
-__=> `%` tự suy luận tên file__
+=> `%` tự suy luận tên file__
 ------------------------------------------------------------------------
 
 # 2. Các hàm xử lý tự động trong makefile
@@ -157,12 +155,12 @@ __Note__ :
 ```c
 SOURCES = $(foreach dir,$(SOURCE_DIR),$(wildcard $(dir)/*.c))
 // Kết quả
-src/app/main.c src/log/logger.c src/math/add.c
+SOURCES chứa src/app/main.c src/log/logger.c src/math/add.c
 ```
 **Mô tả**
 - `foreach` lặp qua từng folder trong SOURCE_DIR
-- Ở mỗi lần lặp, `wildcard lấy tất cả file `.c` trong folder đó
-- Kết quả `SOURCES` chứa tona2 bộ đường dẫn file `.c` từ nhiều folder khác nhau
+- Ở mỗi lần lặp, wildcard lấy tất cả file `.c` trong folder đó
+- Kết quả `SOURCES` chứa toàn bộ đường dẫn file `.c` từ nhiều folder khác nhau
 
 
 ```c
@@ -212,7 +210,7 @@ Do sử dụng sai đường dẫn hoặc object file bị trùng tên.
 
 ------------------------------------------------------------------------
 
-## 2.2.5 Best Practices
+### 2.2.5 Best Practices
 
 -   Tách rõ SOURCE_DIR, BUILD_DIR, HEADER_DIR.
 -   Luôn dùng pattern rule thay vì viết từng rule thủ công.
