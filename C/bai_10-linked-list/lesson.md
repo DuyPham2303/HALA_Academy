@@ -32,6 +32,17 @@ Nếu ta áp dụng phương pháp như trường hợp mảng nhỏ đối vớ
 Linkest list sẽ lưu trữ các phần tử gọi là node gồm 2 thành phần đó là 
 + giá trị nó lưu trữ
 + địa chỉ của node tiếp theo 
+## 2.0 Phân tích và triển khai enum lưu trữ các mã lỗi 
+
+- Trước khi triển khai các thao tác trên linked list, ta cần phân tích về các tình huống lỗi, hoặc hành vi không mong muốn có thể phát sinh trong quá trình chạy chương trình. Điều này rất quan trọng trong việc thiết kế các test case để kiểm tra logic của các hàm có thể xử lý bao quát toàn bộ các khả năng input hay không. Nhằm hạn chế lỗi và đảm bảo hệ thống có thể chạy ổn định ở bất kỳ tình huống nào.  
+
+| Tình huống                    | Ví dụ                |
+| ----------------------------- | -------------------- |
+| Danh sách rỗng                | pop_front, pop_back  |
+| Vị trí không hợp lệ           | insert, erase, get   |
+| malloc thất bại               | CreateNode           |
+| Head NULL khi không mong muốn | nhiều hàm            |
+| Truy xuất ngoài biên          | get(pos), erase(pos) |
 
 ## 2.1 Tạo ra 1 node trong linkest list
 Đầu tiên ta tạo 1 struct để lưu trữ các thành phần của 1 node
