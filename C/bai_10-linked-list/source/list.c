@@ -154,9 +154,12 @@ ListStatus insert(Node **head, int value, int position)
 
     int listSize = size(*head);
 
+     // Vị trí hợp lệ: 1..listSize+1
+    if (position < 1 || position > listSize + 1)
+        return LIST_INDEX_OUT_OF_RANGE;
     //thêm vào đầu / cuối list
-    if (position <= 0) return push_front(head, value);
-    if (position >= listSize) return push_back(head, value);
+    if (position == 1) return push_front(head, value);
+    if (position == listSize + 1) return push_back(head, value);
 
 
     //xử lý thêm ở các vị trí còn lại trong list
@@ -167,7 +170,7 @@ ListStatus insert(Node **head, int value, int position)
     if (status != LIST_OK) return status;
 
     Node *current = *head;
-    int index = 0;
+    int index = ;
 
     //lặp đến node ở vị trí muốn xóa trừ đi 1
     while (index < position - 1)
@@ -189,13 +192,17 @@ ListStatus erase(Node **head, int position)
 
     int listSize = size(*head);
 
-    if (position <= 0) return pop_front(head);
-    if (position >= listSize - 1) return pop_back(head);
+    // Biên hợp lệ: 1 <= position <= listSize
+    if (position < 1 || position > listSize)
+        return LIST_INDEX_OUT_OF_RANGE;
+   
+    if (position == 1) return pop_front(head);
+    if (position == listSize) return pop_back(head);
 
     Node *current = *head;
-    int index = 0;
+    int index = 1;
 
-    while (index < position)
+    while (index < position - 1)
     {
         current = current->next;
         index++;
