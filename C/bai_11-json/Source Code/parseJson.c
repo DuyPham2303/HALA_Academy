@@ -12,7 +12,10 @@ static void skip_whitespace(const char **json) {
 /// @param json : con trỏ đến con trỏ lưu trữ chuỗi json
 /// @return     : con trỏ đến dữ liệu json chứa ký tự null đã xử lý có kiểu JsonValue
 static JsonValue *parse_null(const char **json) {
-    //strcmp(str1,str2)
+    
+    //strcmp(*json,"null") -> không thể dùng vì *json không kết thức bằng '\0'
+
+    //chỉ so sánh đúng số lượng ký tự cần thiết 
     if (strncmp(*json, "null", 4) == 0) {
         JsonValue *value = (JsonValue *) malloc(sizeof(JsonValue));
         value->type = JSON_NULL;
@@ -53,9 +56,18 @@ static JsonValue *parse_number(const char **json) {
         *json                   &end
         
    */
-   char *end;                        //con trỏ tới cuối chuỗi ký 
-   double num = strtod(*json, &end); //hàm để chuyển đổi chuỗi sang kiểu số double 
-   //nếu địa chỉ lưu trong con trỏ end khác *json thì tiến hành cấp phát vùng nhớ và gán giá trị trả về
+   char *end;                        //con trỏ cho biết vị trí mà việc đọc số kết thúc 
+   
+   /* 
+    Note: 
+        - strtod đọc từ *json liên tiếp các ký tự tạo thành số
+        - dừng lại khi gặp ký tự không hợp lệ (chử cái, dấu, ký tự khác số)
+        - end sẽ trỏ tới vị trí của ký tự này (ko còn là số)
+    */
+   
+   double num = strtod(*json, &end); 
+
+   //kiểm tra điều kiện phân tích thành công giá trị số
    if (end != *json) {
        JsonValue *value = (JsonValue *) malloc(sizeof(JsonValue));
        value->type = JSON_NUMBER;
@@ -71,26 +83,25 @@ static JsonValue *parse_number(const char **json) {
 /// @return     : con trỏ đến dữ liệu json chứa chuỗi ký tự đã xử lý có kiểu char*
 static JsonValue *parse_string(const char **json) {
 	(*json)++;	
-    skip_whitespace(json);								 //dịch tới địa chỉ tiếp theo để bắt đầu xử lý từ ký tự đầu tiên 
-	/* 
+    skip_whitespace(json);				//dịch tới địa chỉ tiếp theo để bắt đầu xử lý từ ký tự đầu tiên    
+    if(**json == '\"'){
+        (*json)++;
+    }
+
+    /* 
         h       e       l       l       0       \"
         0x01    0x02    0x03    0x04    0x05
         *json
         start
                                                 end
     */
-   
-    if(**json == '\"'){
-        (*json)++;
-    }
-
-    const char *start = *json;					 //lưu địa chỉ bắt đầu của chuỗi 
-	const char *end = start;                     //biến để kiểm tra độ dài chuỗi
+    const char *start = *json;			//lưu địa chỉ bắt đầu của chuỗi 
+	const char *end = start;            //biến để kiểm tra độ dài chuỗi
     while(*end!= '\"' && *end!= '\0') {
-		end++; 							     //kiểm tra độ dài chuỗi
+		end++; 						    //kiểm tra độ dài chuỗi
 	}
 	if (*end == '\"') {
-		size_t length = end - start;           //cập nhật kích thước chuỗi
+		size_t length = end - start;    //cập nhật kích thước chuỗi
 
     //cấp phát vùng nhớ và lưu tạm thời chuỗi vừa tách được 
 		char *str = (char *) malloc((length + 1) * sizeof(char)); 

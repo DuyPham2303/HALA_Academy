@@ -54,6 +54,7 @@ char* read_json_file(const char* filename) {
         return NULL;
     }    
    
+    //Copy dữ liệu từ file vào buffer 
     fread(buffer,1, length, file);
     buffer[length] = '\0'; // Kết thúc chuỗi
 

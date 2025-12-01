@@ -28,12 +28,32 @@
         - ký tự '\' có ý nghĩa gì ?
         - giói thiệu các hàm (mục đích ? đặc điểm ? các bước ?)
         - Ví dụ phân tách 1 chuỗi json -> debug để giải thích 
-**Note** : 
-    - truyền double pointer vào hàm parse 
-        + mục đích ? 
-        + tại sao làm vậy ?
-    - convert string -> số nguyên 
-    - 
+        - convert string -> số nguyên 
     
+"{
+    Ten : DuyPham,
+    GPA : 7.5.
+    IsStudent : true
+}"
 
+JSON_TYPE:  JSON_OBJECT
+    + key
+        - JSON_TYPE : JSON_STRING 
+        - string    : Ten
+    + value
+        - JSON_TYPE : JSON_STRING
+        - string    : 7.5
+    
+    + key
+        - JSON_TYPE : JSON_STRING 
+        - string    : GPA
+    + value
+        - JSON_TYPE : JSON_NUMBER
+        - number    : 7.5
 
+    + key
+        - JSON_TYPE : JSON_STRING 
+        - string    : GPA
+    + value
+        - JSON_TYPE : JSON_BOOLEAN
+        - boolean    : 7.5

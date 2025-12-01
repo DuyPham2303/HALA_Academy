@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-//danh sách enum để chọn kiểu value 
+//Danh sách liệt kê các kiểu có thế có trong chuỗi json
 typedef enum {
     JSON_NULL,
     JSON_BOOLEAN,
