@@ -1,87 +1,86 @@
 #include "queue.h"
 
-//Khởi tạo hàng đợi 
-void Init_Queue(Queue *queue, int size){
-    queue->items = (int*)malloc(sizeof(int) * size);
-    if(queue->items == NULL){
-        printf("vùng nhớ cấp phát không đủ");
-        return;
+static bool Queue_IsFull(const Queue* q){
+    /* linear queue */
+    //return (q->rear == q->size - 1); 
+    /*circular queue*/
+    return (q->front == ((q->rear + 1) % q->size)); 
+}
+static bool Queue_IsEmpty(const Queue* q){
+    return (q->front == -1);
+}
+QueueStatus Queue_Init(Queue *q, size_t size){
+    if(size <= 0) return QUEUE_INVALID_ARG;
+
+    q->items = (int*)malloc(size * sizeof(int));
+    if(q->items == NULL){
+        return QUEUE_MEMORY_ERROR;
     }
-    queue->size = size;
-    queue->front = queue->rear = -1;
-}
 
-//kiểm tra hàng đợi đầy
-bool Isfull(Queue queue){
-    return (queue.front == ((queue.rear + 1) % queue.size)); //(queue.rear == queue.size - 1);
+    q->size = size;
+    q->front = q->rear = -1;
+    return QUEUE_INIT_OK;
 }
+QueueStatus Queue_Enqueue(Queue *q, int data){
+    if(q == NULL) return QUEUE_INVALID_ARG;
 
-//kiểm tra hàng đợi rỗng 
-bool isEmpty(Queue queue){
-    return (queue.front == QUEUE_EMPTY);
-}
+    if(Queue_IsFull(q)) return QUEUE_FULL;
 
-//thêm phần tử vào hàng đợi 
-void enqueue(Queue *queue, int data){
-    if(Isfull(*queue)){
-        printf("queue đầy\n");
-        return;
+    if(Queue_IsEmpty(q)){
+        q->front = q->rear = 0;
     }
     else{
-        if(isEmpty(*queue)) queue->front = queue->rear = 0;
-        else                queue->rear = (queue->rear + 1) % queue->size; //queue->rear++;
-        queue->items[queue->rear] = data;
-        printf("enqueue %d\tadd: %p\n",queue->items[queue->rear],&queue->items[queue->rear]);
+        /* linear queue */
+        //q->rear++;
+        /* circular queue */
+        q->rear = (q->rear + 1) % q->size;
     }
-}
+    q->items[q->rear] = data;
+    return QUEUE_HANDLE_OK;
 
-//xóa phần tử khỏi hàng đợi
-void dequeue(Queue *queue){
-    if(isEmpty(*queue)){
-        printf("queue rỗng\n");
-        return;
+}
+QueueStatus Queue_Dequeue(Queue *q, int *out){
+    if(q == NULL || out == NULL) return QUEUE_INVALID_ARG;
+    if(Queue_IsEmpty(q)) return QUEUE_EMPTY;
+
+    *out = q->items[q->front];
+
+    if(q->front == q->rear){
+        q->front = q->rear = -1;
     }
     else{
-        //printf("dequeue %d\tadd: %p\n",queue->items[queue->front],&queue->items[queue->front]);
-        queue->items[queue->front] = 0;
-        if(queue->front == queue->rear) queue->front = queue->rear = -1;
-        else                            queue->front++; //queue->front = (queue->front + 1) % queue->size; 
+        /* linear queue */
+        //q->front++;
+        /* circular queue */
+        q->front = (q->front + 1) % q->size;
     }
+    return QUEUE_HANDLE_OK;
 }
+QueueStatus Queue_Front(const Queue *q, int *out){
+    if(q == NULL || out == NULL) return QUEUE_INVALID_ARG;
+    if(Queue_IsEmpty(q)) return QUEUE_EMPTY;
 
-//lấy phần tử đầu hàng đợi
-int getFront(Queue queue){
-    return isEmpty(queue) ? QUEUE_EMPTY : queue.items[queue.front];
+    *out = q->items[q->front];
+    return QUEUE_HANDLE_OK;
 }
-//lấy phần tử cuối hàng đợi
-int getRear(Queue queue){
-    return isEmpty(queue) ? QUEUE_EMPTY : queue.items[queue.rear];
-}
+QueueStatus Queue_Rear(const Queue *q, int *out){
+    if(q == NULL || out == NULL) return QUEUE_INVALID_ARG;
+    if(Queue_IsEmpty(q)) return QUEUE_EMPTY;
 
-//in toàn bộ phần tử hàng đợi
-void printQueue(Queue queue){
-    if(isEmpty(queue)){
-        printf("queue rỗng\n");
-        return;
-    }
-    else{
-        int i = queue.front;
-        printf("queue: ");
-        while(1){
-            printf("%d\t",queue.items[i]);
-            if(i == queue.rear) break;
-            i = (i + 1) % queue.size; //i++;
-        }
-        printf("\n");
-    }
+    *out = q->items[q->rear];
+    return QUEUE_HANDLE_OK;
 }
+QueueStatus Queue_Free(Queue *q){
+    if(q == NULL) return QUEUE_INVALID_ARG;
 
-//giải phóng hàng đợi
-void freeQueue(Queue *queue){
-    if(queue->items != NULL){
-        free(queue->items);
-        queue->items = NULL;
+    if ((q->items != NULL))
+    {
+        free(q->items);
+        q->items = NULL;
     }
-    queue->front = queue->rear = -1;
-    queue->size = 0;
+
+    q->front = q->rear = -1;
+    q->size = 0;
+    return QUEUE_FREE_OK;
+    
 }
