@@ -125,6 +125,61 @@ __+ array__: bên trong array có thể là bất kỳ dữ liệu nào
 **Tóm lại** : Json là định dạng dùng để lưu trữ dữ liệu, và dữ liệu đó được xử lý như thế nào để đảm bảo các yếu tố về việc truyền/nhận hợp lý giữa các thiết bị sẽ do __stack / queue / linked list__ quyết định tùy vào các mục đích khác nhau
 
 
+# 2. Thiết kế cấu trúc lưu trữ dữ liệu JSON
+
+## 2.2 Liệt kê các kiểu dữ liệu có thể có 
+- Ta cần biết rằng C compiler chỉ hiểu và phân tích được từng ký tự trong 1 chuỗi mà không tự hiểu được kiểu dữ liệu cụ thể của từng thành phần. Do đó ta cần tạo ta 1 enum để gán thủ công datatype tương ứng cho từng thành phần sau khi phân tích 
+```c
+  typedef enum {
+    JSON_NULL,
+    JSON_BOOLEAN,
+    JSON_NUMBER,
+    JSON_STRING,
+    JSON_ARRAY,
+    JSON_OBJECT
+} JsonType;
+```
+## 2.1 Cấu trúc tổng quát xử lý cho từng loại dữ liệu
+- Dựa vào enum đã triẻn khai, ta xác định được datatype cho từng thành phần. Lúc này ta cần chỉ định rõ vị trí cụ thể sẽ lưu trữ chúng thông qua cấu trúc sau đây
+  + __JsonType type__   : xác định kiểu json cụ thể 
+  + __union Value__     : chỉ định rõ vị trí mà từng phần tử lưu trữ `(Mỗi thời điểm chỉ có 1 member của union được sử dụng)` 
+
+```c
+//cấu trúc lưu trữ dữ liệu sau khi phân tích từ json
+typedef struct JsonValue {
+    JsonType type;
+
+    //tổ hợp chia sẻ vùng nhớ chung cho các member(biến) lưu trữ Json value (do value chỉ gán cho 1 member)
+    union { 
+        bool boolean;                   
+        double number;
+        char *string; 
+
+        //cấu trúc lưu trữ cho mảng json
+        struct {
+            struct JsonValue *values; //con trỏ đệ quy trở lại JsonValue để xác định kiểu (type) và biến tương ứng để lưu trữ value 
+            size_t count;             //đếm số lượng phần tử trong mảng
+        } array;
+
+        //cấu trúc lưu trữ cho đối tượng json
+        struct {
+            char **keys;              //mảng con trỏ lưu trữ các chuỗi key
+            struct JsonValue *values; //con trỏ đệ quy trở lại JsonValue để xác định kiểu (type) và biến tương ứng để lưu trữ value 
+            size_t count;             //đếm số lượng cặp key-value
+        } object;
+    } value;
+}JsonValue;
+```
+### 2.1.1 Lưu ý về kiểu size_t
+
+**Theo chuẩn C**
+
+- Đây là kiểu chuẩn để biểu diễn kích thước và số lượng phần tử 
+- Các hàm như `malloc`, `strlen` , `sizeof` , `memcpy`, `strncpy` đều làm việc với kích thước bộ nhớ, và dùng kiểu size_t làm chuẩn 
+
+**Đây là kiểu unsigned - không âm**
+- Phù hợp khi biểu diễn số lượng - luôn là số lớn hơn 0
+- Tự động phù hợp với kiển trúc (32/64 - bit)
 
 
 # 3. Ứng dụng trong lĩnh vực embedded
@@ -133,9 +188,12 @@ __+ array__: bên trong array có thể là bất kỳ dữ liệu nào
 <img src = "https://github.com/user-attachments/assets/603c06ae-5bb6-462a-bb4f-8735051bf7c6" width = "700" height = "300">
 
 + __Gửi dữ liệu__ : ta có thể sử dụng chuỗi json để lưu các thông tin về nhiệt độ và độ ẩm và gửi lên server để xử lý
+
 + __Cấu hình điều khiển__: chuỗi json có thể được gửi từ server về thiết bị chứa các thông tin về cấu hình cài đặt như nhiệt độ,thời gian tương ứng để bật tắt các thiết bị ngoại vi
+
 ## 3.2 So sánh với Struct 
 __Quản lý memory__ :
+
 + struct sẽ cấp phát vùng nhớ cho tất cả các thành viên được định nghĩa 1 khi khai báo. vì vậy sẽ có 1 số trường hợp người dùng không muốn 1 số thành viên của struct, điều này sẽ gây lãng phí memory
 + Json hiệu quả hơn so với struct do chỉ chứa các trường định nghĩa chung về loại dữ liệu mà người dùng muốn cấu hình,chính vì vậy người dùng có thể nhập các dữ liệu cấu hình mong muốn mà không gây dư thừa memory 
 
