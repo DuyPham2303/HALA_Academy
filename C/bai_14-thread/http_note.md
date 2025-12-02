@@ -204,11 +204,11 @@ application/x-www-form-urlencoded
 ```
 
 + Gửi dữ liệu từ form bằng POST
-+ Server nhận, xử lý và lưu lại vào file như ở bước 4 và 5
++ Server nhận, xử lý và lưu lại vào file 
 + Hiển thị thông báo Đã gửi thành công nếu mọi thứ ổn
 
 
-## Bước 7 - Hiển thị dữ liệu đã lưu trong khi vẫn chạy song song nhiều client
+## Bước 7 - Hiển thị dữ liệu đã lưu 
 - Hiển thị dữ liệu đã lưu ra trình duyệt bằng cách xử lý HTTP GET /data.
 - Khi truy cập http://localhost:8080/data, server sẽ:
     + mở và đọc file __saved_data.json__
