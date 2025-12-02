@@ -26,17 +26,17 @@
     - server : máy chủ website
     - port 80 : cổng mặc định kết nối 
 ## b. Các bước thiết lập trên mã nguồn C
-    - client Khởi động TCP connection đến server
-    - Socket interface (kết nối được thiết lập) bao gồm:    
-        + IP address
-        + protocol type 
-        + port number
-    - Sau khi kết nối thành công 
-        + client request server với request message : chứa path 
-    - server nhận và xử lý request qua socket và gửi client response 
-        + data return là file HTML
-        + Server đóng TCP connection
-        + Client nhận response từ server -> đóng TCP connection
+- client Khởi động TCP connection đến server
+- Socket interface (kết nối được thiết lập) bao gồm:    
+    + IP address
+    + protocol type 
+    + port number
+- Sau khi kết nối thành công 
+    + client request server với request message : chứa path 
+- server nhận và xử lý request qua socket và gửi client response 
+    + data return là file HTML
+    + Server đóng TCP connection
+    + Client nhận response từ server -> đóng TCP connection
 ## c. Tóm tắt quy trình truy cập website
 
 <p align = "center">
@@ -54,20 +54,27 @@
     + Socket ID dùng đọc/ghi dữ liệu 
 ## a. Request message 
 + Cấu trúc được chia làm 3 phần
+
     **Request Line**
-        - __method__           : GET , POST, HEAD, PUT , DELETE
-        - __URL path__         : /index.html 
-        - __protocol version__ : HTTP/1.1 hoặc 1.0
+
+- __method__           : GET , POST, HEAD, PUT , DELETE
+- __URL path__         : /index.html 
+- __protocol version__ : HTTP/1.1 hoặc 1.0
+    
     ```c
     GET /index.html HTTP/1.1
     ```
+    
     **Header** 
+    
     ```c
     Header-Name: Value
     ```
+    
     **Body**
-        - __GET__ : thường không có body
-        - __POST/PUT__ : chứa dữ liệu (JSON, text, form) gửi lên server 
+
+- __GET__ : thường không có body
+- __POST/PUT__ : chứa dữ liệu (JSON, text, form) gửi lên server 
     ```c
     Request Line:
         GET /index.html HTTP/1.1
@@ -119,9 +126,9 @@ char* read_file(char* pf){
     return html
 }
 ```
-    - `fopen()`, `fread()`, `fclose()`
-    - con trỏ Đọc toàn bộ nội dung vào char *html
-    - Gửi __Content-Length__ 
+- `fopen()`, `fread()`, `fclose()`
+- con trỏ Đọc toàn bộ nội dung vào char *html
+- Gửi __Content-Length__ 
 ```c
 char* html = read_file("index.html");
 send(socket, html, length);
@@ -130,12 +137,13 @@ send(socket, html, length);
 ## Bước 3 - Phân tích URT và trả file tương ứng 
 + Server cần tách method & path từ request:
 + Gửi nội dung file tương ứng với từng đường dẫn:
-| Path            | File trả về             |
-| --------------- | ----------------------- |
-| `/`             | index.html              |
-| `/styles.css`   | styles.css              |
-| `/data`         | data.json hoặc data.csv |
-| (không tồn tại) | 404 Not Found           |
+
+| **Path**         | **File trả về**                |
+|------------------|--------------------------------|
+| `/`              | `index.html`                   |
+| `/styles.css`    | `styles.css`                   |
+| `/data`          | `data.json` hoặc `data.csv`    |
+| *(không tồn tại)*| `404 Not Found`                |
 
 
 ## Bước 4 - Xử lý POST Request và lưu dữ liệu
