@@ -55,7 +55,7 @@
 ## a. Request message 
 + Cấu trúc được chia làm 3 phần
 
-    **Request Line**
+    **REQUEST LINE**
 
 - __method__           : GET , POST, HEAD, PUT , DELETE
 - __URL path__         : /index.html 
@@ -65,39 +65,46 @@
     GET /index.html HTTP/1.1
     ```
     
-    **Header** 
+    **HEADER** 
     
     ```c
     Header-Name: Value
     ```
     
-    **Body**
+    **BODY**
 
 - __GET__ : thường không có body
 - __POST/PUT__ : chứa dữ liệu (JSON, text, form) gửi lên server 
-    ```c
-    Request Line:
-        GET /index.html HTTP/1.1
-    ```
-## b. Response message
-   __Status line__
-        - __protocol version__ : HTTP/1.1
-        - __Status code__: 200,404,302
-        - __Status text__: 200 OK, 404 Not Found, 403 Forbidden
-     ```c
-    Response Status Line:
-        HTTP/1.1 200 OK
-    ```
 
-   __Header line__
-    ```c
-    Content-Type: text/html
-    Content-Length: 1024
-    ```
+```c
+Request Line:
+    GET /index.html HTTP/1.1
+```
+
+## b. Response message
+- Được chia làm 3 phần
+
+   **STATUS LINE**
+
+- __protocol version__ : HTTP/1.1
+- __Status code__: 200,404,302
+- __Status text__: 200 OK, 404 Not Found, 403 Forbidden
+
+```c
+Response Status Line:
+    HTTP/1.1 200 OK
+```
+   **HEADER LINE**
+
+```c
+Content-Type: text/html
+Content-Length: 1024
+```
    
-   __Body__
-        - data return ở dạng 1 trang HTML. Chính là giao diện web hiển thị 
-        - dữ liệu được tạo thành từ : HTML page , JSON, CSS Ảnh , file 
+   **BODY**
+
+- data return ở dạng 1 trang HTML. Chính là giao diện web hiển thị 
+- dữ liệu được tạo thành từ : HTML page , JSON, CSS Ảnh , file 
 
 # Các bước xây dựng HTTP server 
 ## Bước 1 – Tạo HTTP đơn giản
@@ -201,7 +208,7 @@ application/x-www-form-urlencoded
 + Hiển thị thông báo Đã gửi thành công nếu mọi thứ ổn
 
 
-# Bước 7 - Hiển thị dữ liệu đã lưu trong khi vẫn chạy song song nhiều client
+## Bước 7 - Hiển thị dữ liệu đã lưu trong khi vẫn chạy song song nhiều client
 - Hiển thị dữ liệu đã lưu ra trình duyệt bằng cách xử lý HTTP GET /data.
 - Khi truy cập http://localhost:8080/data, server sẽ:
     + mở và đọc file __saved_data.json__
