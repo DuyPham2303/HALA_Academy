@@ -45,10 +45,8 @@ const char* json_obj = "{      "
                           "\"TienNuoc\":40.000"
                         "}"
                       "}";
-const char* json_array = "[null,true,10e4,\"hello\"]";
 
 #define FILE_DIR ".vscode/c_cpp_properties.json"
-
 
 char* read_json_file(const char* filename);
 int main()
@@ -58,7 +56,7 @@ int main()
     //printf("Nội dung JSON:\n%s\n", json_str);
     
     //trả về vùng nhớ lưu trữ dữ liệu json đã xử lý   
-    JsonValue* json_value = parse_json(&json_array); //0xab
+    JsonValue* json_value = parse_json(&json_obj); //0xab
 
     //in ra dữ liệu json 
     printf("NỘI DUNG SAU KHI PHÂN TÁCH\n");

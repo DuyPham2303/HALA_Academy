@@ -9,7 +9,7 @@
 #define MAX_REQUEST 4096
 pthread_mutex_t mutex;
 int count = 0;
-//đọc nhiều định dạng file :HTML,CSS,JS,JSON
+
 char* read_file(const char *filename) {
     FILE *f = fopen(filename, "r");
     if (!f) return NULL;
@@ -102,7 +102,7 @@ void *handle_client(void *arg)
     char method[8], path[256];
     sscanf(buffer, "%s %s", method, path);
 
-    //hệ thống chuyển đang HTML có đuôi url: /save-data để phản hồi khi người dùng bấm gửi
+    //hiển thị giao diện phản hồi sau khi gửi có url : http://localhost:8080/save-data
     if (strcmp(method, "POST") == 0 && strcmp(path, "/save-data") == 0)
     {
         int content_length = get_content_length(buffer);
@@ -124,12 +124,13 @@ void *handle_client(void *arg)
         if (body && strlen(body) > 0)
         {
             save_form_encoded_as_json(body);
-            send_response(client, "200 OK", "text/html", "<h2>✅ Gửi thành công!</h2><a href='/'>Quay lại</a>");
+            send_response(client, "200 OK", "text/html; charset=UTF-8","<meta charset='UTF-8'><h2>Gửi thành công!</h2><a href='/'>Quay lại</a>");
         }
         else {
-            send_response(client, "400 Bad Request", "text/plain", "Không nhận được dữ liệu");
+            send_response(client, "400 Bad Request", "text/plain; charset=UTF-8", "Không nhận được dữ liệu");
         }
     }
+    //hiển thị giao diện tương tác khi truy cập : http://localhost:8080/
     else if (strcmp(method, "GET") == 0 && strcmp(path, "/") == 0) {
         char *html = read_file("data.html");
         if (html) {
@@ -137,22 +138,9 @@ void *handle_client(void *arg)
             free(html);
         }
         else {
-            send_response(client, "404 Not Found", "text/plain", "Không tìm thấy index.html");
+            send_response(client, "404 Not Found", "text/plain; charset=UTF-8", "Không tìm thấy data.html");
         }
     }
-    else if (strcmp(method, "GET") == 0 && strcmp(path, "/data") == 0) {
-        char *content = read_file("saved_data.json");
-        if (content) {
-            //send_response(client, "200 OK", "application/json", content);
-            char *html = malloc(strlen(content) + 100);
-            sprintf(html, "<h2>Dữ liệu đã gửi:</h2><pre>%s</pre>", content);
-            send_response(client, "200 OK", "text/html", html);
-            free(content);
-        } else {
-            send_response(client, "404 Not Found", "text/plain", "Không có dữ liệu");
-        }
-    }
-
     else
     {
         send_response(client, "404 Not Found", "text/plain", "Not Found");
@@ -161,68 +149,23 @@ void *handle_client(void *arg)
     closesocket(client);
     return NULL;
 }
-void *print(void *task)
-{
-    int delay = 0;
-    while (1)
-    {
-        pthread_mutex_lock(&mutex);
-        printf("%s is running %d\n", (char*)task, count++);
-        if (strcmp(task, "task 1"))
-            delay = 500;
-        else if (strcmp(task, "task 2"))
-            delay = 250;
-        else
-            delay = 1500;
-        pthread_mutex_unlock(&mutex);
-        Sleep(delay);
-    }
-}
-
 int main()
 {
-
-    WSADATA wsa; //khai báo đối tượng chứa thông tin về phiên bản Winsock : phiên bản, mô tả, trạng thái.
-    
-    //biến lưu socket của máy chủ.
-    //con trỏ tới socket của client, dùng sau này khi có kết nối đến.
+    WSADATA wsa;
     SOCKET server, *client_ptr;
-
-    //cấu trúc dùng để lưu thông tin địa chỉ IP và cổng mà server sẽ lắng nghe.
     struct sockaddr_in addr;
 
-    //khởi tạp winsock bao gồm 
-    /* 
-        + Winsock API phiên bản 2.2.
-
-        + MAKEWORD(2,2): macro tạo số phiên bản từ 2 và 2.
-
-        + &wsa: con trỏ tới cấu trúc sẽ nhận thông tin khởi động.
-    */
     WSAStartup(MAKEWORD(2, 2), &wsa);
-
-    //Lưu trữ khởi tạo socket
     server = socket(AF_INET, SOCK_STREAM, 0);
 
-    addr.sin_family = AF_INET;          //Xác định kiểu địa chỉ là IPv4.
-    addr.sin_port = htons(8080);        //PORT number
-    addr.sin_addr.s_addr = INADDR_ANY;  //socket sẽ lắng nghe trên tất cả các địa chỉ IP khả dụng trên máy (nếu có nhiều card mạng).
-    
-    //Liên kết socket với địa chỉ và cổng.
-    bind(server, (struct sockaddr *)&addr, sizeof(addr));
-    
-    int maxqueue = 5;
-    listen(server,maxqueue);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(8080);
+    addr.sin_addr.s_addr = INADDR_ANY;
 
-    printf("🟢 Server đang chạy đa luồng trên http://localhost:8080/\n");
-    // pthread_t tid1, tid2, tid3;
-    // const char* task1 = "task 1";
-    // const char* task2 = "task 2";
-    // const char* task3 = "task 3";
-    // pthread_mutex_init(&mutex, NULL);
-    // pthread_create(&tid1, NULL, print,(void*)task1);
-    // pthread_create(&tid2, NULL, print,(void*)task2);
-    // pthread_create(&tid3, NULL, print,(void*)task3);
+    bind(server, (struct sockaddr *)&addr, sizeof(addr));
+    listen(server, 5);
+
+    printf("🟢 Server đang chạy trên http://localhost:8080/\n");
     while (1)
     {
         SOCKET client = accept(server, NULL, NULL);
@@ -232,19 +175,9 @@ int main()
         client_ptr = malloc(sizeof(SOCKET));
         *client_ptr = client;
 
-        pthread_t tid;
         handle_client(client_ptr);
-        //pthread_create(&tid, NULL, handle_client, client_ptr);
-        //pthread_detach(tid); // Thread tự giải phóng sau khi xử lý xong
-
         printf("received from server\n");
-        Sleep(1500);
     }
-    // pthread_join(tid1, NULL);
-    // pthread_join(tid2, NULL);
-    // pthread_join(tid3, NULL);
-
-    // pthread_mutex_destroy(&mutex);
     closesocket(server);
     WSACleanup();
     return 0;

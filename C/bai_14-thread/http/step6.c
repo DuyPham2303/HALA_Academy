@@ -124,10 +124,10 @@ void *handle_client(void *arg)
         if (body && strlen(body) > 0)
         {
             save_form_encoded_as_json(body);
-            send_response(client, "200 OK", "text/html", "<h2>✅ Gửi thành công!</h2><a href='/'>Quay lại</a>");
+            send_response(client, "200 OK", "text/html; charset=UTF-8","<meta charset='UTF-8'><h2>Gửi thành công!</h2><a href='/'>Quay lại</a>");
         }
         else {
-            send_response(client, "400 Bad Request", "text/plain", "Không nhận được dữ liệu");
+            send_response(client, "400 Bad Request", "text/plain; charset=UTF-8", "Không nhận được dữ liệu");
         }
     }
     //hiển thị giao diện tương tác khi truy cập : http://localhost:8080/
@@ -138,7 +138,7 @@ void *handle_client(void *arg)
             free(html);
         }
         else {
-            send_response(client, "404 Not Found", "text/plain", "Không tìm thấy index.html");
+            send_response(client, "404 Not Found", "text/plain; charset=UTF-8", "Không tìm thấy data.html");
         }
     }
     else
@@ -184,14 +184,14 @@ int main()
     listen(server, 5);
 
     printf("🟢 Server đang chạy đa luồng trên http://localhost:8080/\n");
-    pthread_t tid1, tid2, tid3;
-    const char* task1 = "task 1";
-    const char* task2 = "task 2";
-    const char* task3 = "task 3";
-    pthread_mutex_init(&mutex, NULL);
-    pthread_create(&tid1, NULL, print,(void*)task1);
-    pthread_create(&tid2, NULL, print,(void*)task2);
-    pthread_create(&tid3, NULL, print,(void*)task3);
+    //pthread_t tid1,tid2,tid3;
+    //const char* task1 = "task 1";
+    // const char* task2 = "task 2";
+    // const char* task3 = "task 3";
+    // pthread_mutex_init(&mutex, NULL);
+    //pthread_create(&tid1, NULL, print,(void*)task1);
+    // pthread_create(&tid2, NULL, print,(void*)task2);
+    // pthread_create(&tid3, NULL, print,(void*)task3);
     while (1)
     {
         SOCKET client = accept(server, NULL, NULL);
@@ -201,18 +201,18 @@ int main()
         client_ptr = malloc(sizeof(SOCKET));
         *client_ptr = client;
 
-        pthread_t tid;
-        pthread_create(&tid, NULL, handle_client, client_ptr);
-        pthread_detach(tid); // Thread tự giải phóng sau khi xử lý xong
-
+        //pthread_t tid;
+        //pthread_create(&tid, NULL, handle_client, client_ptr);
+        //pthread_detach(tid); // Thread tự giải phóng sau khi xử lý xong
+        handle_client(client_ptr);
         printf("received from server\n");
-        Sleep(1500);
+        //Sleep(3000);
     }
-    pthread_join(tid1, NULL);
-    pthread_join(tid2, NULL);
-    pthread_join(tid3, NULL);
+    // pthread_join(tid1, NULL);
+    // pthread_join(tid2, NULL);
+    // pthread_join(tid3, NULL);
 
-    pthread_mutex_destroy(&mutex);
+    // pthread_mutex_destroy(&mutex);
     closesocket(server);
     WSACleanup();
     return 0;

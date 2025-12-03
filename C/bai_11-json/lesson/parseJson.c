@@ -49,17 +49,16 @@ static JsonValue *parse_boolean(const char **json) {
 /// @param json : con trỏ đến con trỏ lưu trữ chuỗi json
 /// @return     : con trỏ đến dữ liệu json chứa dãy số đã xử lý có kiểu double
 static JsonValue *parse_number(const char **json) {
-   //"123abc"
    /* 
-        'a'     '2'     '3'     'a'     
+        '1'     '2'     '3'     'a'     
         0xa1    0xa2    0xa3    0xa4
         *json                   &end
         
    */
-   char *end;                        //con trỏ cho biết vị trí mà việc đọc số kết thúc 
+   char *end;//con trỏ cho biết vị trí mà việc đọc số kết thúc 
    
-   /* 
-    Note: 
+    //note 
+    /* 
         - strtod đọc từ *json liên tiếp các ký tự tạo thành số
         - dừng lại khi gặp ký tự không hợp lệ (chử cái, dấu, ký tự khác số)
         - end sẽ trỏ tới vị trí của ký tự này (ko còn là số)

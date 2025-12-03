@@ -5,7 +5,7 @@
       "name":"Debug with GDB",
       "type":"cppdbg",
       "request":"launch",
-      "program":"${fileDirname}\\main.exe",
+      "program":"${fileDirname}//main.exe",
       "stopAtEntry": true,
       "cwd":"${workspaceFolder}",
       "preLaunchTask":"Build-C-program",   

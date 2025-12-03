@@ -10,8 +10,9 @@
                 "-O0",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-lws2_32"
+                //"${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${fileDirname}\\main.exe",
+                "-lws2_32",
             ],
             "options": {
                 "cwd": "${fileDirname}"

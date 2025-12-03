@@ -40,12 +40,20 @@ char* read_json_file(const char* filename) {
         return NULL;
     }
 
+    //Note
+    /* 
+        - Không dùng strlen để đo kích thước file. vì nó không phải chuỗi
+        - Bởi vì file khi đọc từ ổ đĩa là text hoặc binary 
+    */
     // Di chuyển tới cuối file để lấy kích thước
     fseek(file, 0, SEEK_END);
 
-    //trả về độ dài của tệp
+    //trả về độ dài của file bằng cách lấy ra vị trí hiện tại 
     length = ftell(file);
-    fseek(file, 0, SEEK_SET); // quay lại đầu file
+    
+    // đưa con trỏ file về đầu
+    //fseek(file, 0, SEEK_SET); //rewind(f)
+    rewind(file);
 
     buffer = malloc(length + 1); // cấp phát động để lưu chuỗi đọc về từ tệp
     if (!buffer) {
