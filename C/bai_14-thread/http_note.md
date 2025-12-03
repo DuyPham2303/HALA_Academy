@@ -12,7 +12,8 @@
         + Phương thức (method) gửi/nhận dữ liệu
         + Cách trình duyệt và server trao đổi tài nguyên
         + cách trao đổi dữ liệu siêu văn bản : text, HTML, CSS, hình ảnh, âm thanh, video.
-=> Từ đó mã hóa thành giao diện hiển thị trên web
+      
+__=> Từ đó mã hóa thành giao diện hiển thị trên web__
 
 
 # Mô hình HTTP
@@ -32,7 +33,7 @@
     + protocol type 
     + port number
 - Sau khi kết nối thành công 
-    + client request server với request message : chứa path 
+    + client request server với request message chứa path đến website  
 - server nhận và xử lý request qua socket và gửi client response 
     + data return là file HTML
     + Server đóng TCP connection
