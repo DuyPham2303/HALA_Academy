@@ -18,18 +18,33 @@
 
 **b) Lý do cần có Union ?**
 - Giả sử ta cần thu thập dữ liệu cảm biến từ MCU1 và truyền sang MCU2 thông qua UART. Với dữ liệu cần truyền là các số thực __(float)__ làm tròn đến 3 con số. 
-    + `Phương án thông thường :` 
-        + MCU1 converts __(float)__ sang __(string)__ (ví dụ : 123.456 -> "123.456") 
-        + MCU1 sends từng byte sang MCU2 
-        + MCU2 receives __(string)__ và convert về __(float)__ 
+
++ `Truyền thẳng biến float`
+  + Diều này là không thể do UART chỉ có thể truyền mỗi lần 1 byte
+  + Do đó về ản chất ta sẽ cần tách thành 4 byte và truyền lần lượt
+  __Ví dụ__ : float data = 123.456f
+
+  + Giả sử dạng nhị phân trong RAM biểu diễn như sau
+  ```c
+  0x42 0xF6 0xE9 0x79   (little endian)
+  ```
+  + UART sẽ xử lý như sau 
+  ```c
+  send_byte(0x42)
+  send_byte(0xF6)
+  send_byte(0xE9)
+  send_byte(0x79)
+  ```
+
+__=> Lúc này bên MCU2 nhận được từng byte sẽ cần phải xử lý và sắp xếp lại thành dữ liệu hoàn chỉnh tùy theo kiến trúc little / big endian. Vì vậy khá là phức tạp__ 
+      
++ `Phương án truyền chuỗi :` 
+
+  + MCU1 converts __(float)__ sang __(string)__ (ví dụ : 123.456 -> "123.456") 
+  + MCU1 sends từng byte sang MCU2 tương ứng với từng ký tự số 
+  + MCU2 receives __(string)__ và convert về __(float)__ thông qua hàm `atof()` 
     
-    => Cách này tốn tài nguyên và thời gian xử lý cho việc chuyển đổi giữa số thực và chuỗi
-
-    + `Phương án tối ưu :`
-        + MCU1 Truyền từng byte mà không cần xử lý gì cả
-        + MCU2 nhận từng byte và tự sắp xếp các byte để tạo thành số __(float)__ mà không cần thao tác gì khác 
-
-    => Đó chính là cách mà Union sẽ xử lý, cho phép dữ liệu mà ta thao tác có thể được biểu diễn và nhìn nhận ở nhiều kiểu dữ liệu khác nhau trên cùng 1 vị trí bộ nhớ 
+__=> Cách này mặc dù dễ debug bằng UART log và không cần xử lý endianness tốn tài nguyên và thời gian xử lý cho việc chuyển đổi giữa số thực và chuỗi__
 
 ## 1.3 Thao tác với Union
 
@@ -62,6 +77,41 @@ dt.str[0] = 21;
 ```
 
 __Note__ : Khi printf các member trên thì sẽ trả về giá trị của member cuối cùng được ghi dữ liệu, lý do chính là vì đặc điểm chia sẻ chung bộ nhớ. Vì vậy tại 1 thời điểm chỉ có 1 member được đọc/ghi dữ liệu hợp lệ
+
+**b) Giải quyết bài toán truyền bién float từ MCU1 sang MCU2**
+
+**MCU1 gói data thành định dạng union và gửi**
+```c
+union FloatBytes {
+    float f;
+    uint8_t bytes[4];
+};
+
+union FloatBytes packet;
+packet.f = 123.456f;
+
+// Truyền từng byte
+send(packet.bytes[0]);
+send(packet.bytes[1]);
+send(packet.bytes[2]);
+send(packet.bytes[3]);
+```
++ MCU1 Truyền 4 byte mà không cần xử lý gì cả
++ MCU2 nhận từng byte và tự sắp xếp các byte để tạo thành số __(float)__ mà không cần thao tác gì khác 
+
+**MCU2 Nhận mà không cần convert, không tốn CPU**
+
+```c
+union FloatBytes recv;
+recv.bytes[0] = b0;
+recv.bytes[1] = b1;
+recv.bytes[2] = b2;
+recv.bytes[3] = b3;
+
+float x = recv.f;   // float tái tạo lại y hệt ban đầu
+```
+
+__=> Đó chính là cách mà Union sẽ xử lý, cho phép dữ liệu mà ta thao tác có thể được biểu diễn và nhìn nhận ở nhiều kiểu dữ liệu khác nhau trên cùng 1 vị trí bộ nhớ__ 
 
 # 2. Ứng dụng thực tế
 ## 2.1 Chuyển đổi giữa byte array và cấu trúc dữ liệu cụ thể khi truyền/nhận gói tin qua UART/SPI/I2C
@@ -220,17 +270,13 @@ struct SensorReading {
 	float humidity; 	// Humidity
 	uint8_t sensorId; 	// Sensor ID
 };
-// All of this information is needed and accessed at the same time for each reading.
 ```
 
-    + __Rõ ràng và an toàn__ : do mỗi member là độc lập, hạn chế rủi ro về lỗi __undefined behaviour__ do access sai dữ liệu. Do đó code trở nên
-
-=> Dễ hiểu, dể đọc, dễ bảo trì
-
-    + __Yêu cầu về truyền dữ liệu dưới dạng block__ : định dạng tiêu chuẩn cho  
-        + các gói tin truyền thông `UART` , `SPI` , `I2C`
-        + các bản ghi trong FLASH
-        + Cấu trúc dữ liệu phức tạp
++ __Rõ ràng và an toàn__ : do mỗi member là độc lập, hạn chế rủi ro về lỗi __undefined behaviour__ do access sai dữ liệu. Do đó code trở nên dễ hiểu, dể đọc, dễ bảo trì
++ __Yêu cầu về truyền dữ liệu dưới dạng block__ : định dạng tiêu chuẩn cho  
+    + các gói tin truyền thông `UART` , `SPI` , `I2C`
+    + các bản ghi trong FLASH
+    + Cấu trúc dữ liệu phức tạp
 
 ## 4.3 Trường hợp cụ thể dùng Union
 - __Khi cần tiết kiệm bộ nhớ__ : 
