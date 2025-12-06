@@ -10,7 +10,7 @@
     </td>
 </h3>
     <td width="40%">
-    <h3>🔹Khi 1 hàm được gọi sẽ được CPU cấp phát 1 vùng nhớ tạm trên RAM để lưu trữ khối dữ liệu của hàm gọi là __Stack frame__
+    <h3>🔹Khi 1 hàm được gọi sẽ được CPU cấp phát 1 vùng nhớ tạm trên RAM để lưu trữ khối dữ liệu của hàm gọi là Stack frame
   </tr>
 </table>
 
@@ -45,7 +45,7 @@ __=> Do đó CPU cần 1 nơi để tự động lưu - tự động thu hồi �
         <li>Thông thường PC sẽ tăng dần theo thứ tự địa chỉ tăng dần của các câu lệnh.   </li>
         <li>Khi 1 hàm được gọi, PC thay đổi đột ngột theo địa chỉ của hàm được call</li>
         <li>Khi thoát khỏi hàm, cần biết chính xác địa chỉ trả về của câu lệnh tiếp theo sau lời gọi hàm.</li>
-        <li>Do đó địa chỉ của câu lệnh tiếp theo này cần lưu trữ khi __call function__</li>
+        <li>Do đó địa chỉ của câu lệnh tiếp theo này cần lưu trữ khi call function</li>
       </ul>
     </td>
     <td>
@@ -77,7 +77,6 @@ __=> Do đó CPU cần 1 nơi để tự động lưu - tự động thu hồi �
     </td>
   </tr>
 </table>
-
 => Tóm lại stack pointer là thanh ghi sẽ được tăng/giảm địa chỉ để quản lý các hàm, biến cục bộ và call stack 
 
 ### 1.1.4 Quá trình function call thực hiện như thế nào 
@@ -158,18 +157,17 @@ __=> Do đó CPU cần 1 nơi để tự động lưu - tự động thu hồi �
 
 ## 1.2 Cơ sở ra đời của DSA Stack
 ### 1.2.1 Tóm tắt Hardware Stack và lý do cần có DSA Stack
-- phân vùng stack __ được quản lý tự động bởi Os + CPU__ dựa trên cơ chế LIFO. với các đặc điểm sau  
-    + Mỗi lần __gọi hàm__ các local var, thông tin trả về, param được __đẩy vào stack theo thứ tự nào__ thì Khi __hàm kết thúc__ chúng sẽ được thu hồi theo __thứ tự ngược lại__ 
-    + Hoạt động dựa trên 2 cơ chế là Push/Pop, và có thể đọc truy cập data thông qua Peek/Top 
-
+- phân vùng stack được quản lý tự động bởi __Os + CPU__ dựa trên cơ chế LIFO. với các đặc điểm sau  
+    + Mỗi lần gọi hàm các local var, thông tin trả về, param được __đẩy vào stack theo thứ tự nào__ thì Khi __hàm kết thúc__ chúng sẽ được thu hồi theo __thứ tự ngược lại__ 
+    + Hoạt động dựa trên 2 cơ chế là __Push/Pop__, và có thể đọc truy cập data thông qua __Peek/Top__ 
 => Dựa trên nguyên lý vận hành này, mà người ta đã xây dựng nên một cấu trúc dữ liệu Stack để ứng dụng vào trong lý thuyết thuật toán để giải quyết các bài toán phức tạp.
 
 ## 1.3 Đặc điểm của Stack (DSA)
 - Các thao tác trên 1 cấu trúc dữ liệu stack tuân theo các thao tác cơ bản tương tự như vùng ngăn xếp trên RAM
-    + Push : Thêm 1 phần tử vào trên cùng
-    + Pop : Lấy 1 phần tử khỏi đình
-    + Top/Peek : xem phần tử trên cùng mà không pop
-    + Empty/full : kiểm tra tình trạng stack
+    + __Push__ : Thêm 1 phần tử vào trên cùng
+    + __Pop__ : Lấy 1 phần tử khỏi đình
+    + __Top/Peek__ : xem phần tử trên cùng mà không pop
+    + __Empty/full__ : kiểm tra tình trạng stack
 ## 1.4 So sánh giữa Stack segment và Stack (DSA)
 
 | Stack trong C (call stack)          | Stack DSA (do lập trình viên tạo) |
@@ -203,11 +201,17 @@ __=> Do đó CPU cần 1 nơi để tự động lưu - tự động thu hồi �
 ## 2.2 Triển khai các thao tác  
 ### 2.2.1 Tạo các kiểu dữ liệu cần thiết
 ```c
-typedef uint8_t StackStatus;
+typedef enum
+{
+    STACK_INIT_OK = 0, // Nếu cấp phát memory cho stack thành công
+    STACK_FREE_OK,     // Nếu thu hồi memory thành công
+    STACK_HANDLE_OK,   // Nếu push/pop/top bình thường
+    STACK_FULL,        // stack đầy - ko thể push phần tử mới
+    STACK_EMPTY,       // stack rỗng - chưa có data nào
+    STACK_INVALID_ARG, // Lỗi truyền vào 1 giá trị ko hợp lệ
+    STACK_MEMORY_ERROR // lỗi cấp phát/thu hồi/truy cập bộ nhớ ko hợp lệ
+} StackStatus;
 
-#define STACK_OVERFLOW  ((StackStatus)0)
-#define STACK_EMPTY     ((StackStatus)1)
-#define STACK_OK        ((StackStatus)2)
 
 typedef struct{
     int* items;
@@ -217,58 +221,93 @@ typedef struct{
 ```
 ### 2.2.2 Khởi tạo stack
 ```c
-StackStatus Init_Stack(Stack_datastructure* stack,int size){
-    stack->items = malloc(size*sizeof(int));
-    if(stack->items == NULL){
-        printf("không đủ vùng nhớ cấp phát");
-        return STACK_OVERFLOW;
-    }
+StackStatus Stack_Init(Stack* stack, int size)
+{
+    if (stack == NULL || size <= 0)
+        return STACK_INVALID_ARG;
+
+    stack->items = (int*)malloc(sizeof(int) * size);
+    if (stack->items == NULL)
+        return STACK_MEMORY_ERROR;
+
     stack->size = size;
     stack->top = -1;
-    return STACK_OK;
+
+    return STACK_INIT_OK;
 }
 ```
 ### 2.2.3 Thao tác kiểm tra trạng thái stack
 ```c
-StackStatus CheckStatus(const Stack_datastructure* stack){
-    if(stack->top == stack->size - 1) return STACK_OVERFLOW;
-    else if(stack->top == -1)         return STACK_EMPTY;
-    else return STACK_OK;
+static bool Stack_IsEmpty(const Stack* stack)
+{
+    return (stack == NULL || stack->top == -1);
+}
+
+static bool Stack_IsFull(const Stack* stack)
+{
+    if (stack == NULL) return true;
+    return (stack->top == stack->size - 1);
 }
 ```
 ### 2.2.4 Thao tác push
 ```c
-StackStatus Push(Stack_datastructure* stack,int indata){
-    if(CheckStatus(stack) == STACK_OVERFLOW){
-        printf("stack đầy\n");
-        return STACK_OVERFLOW;
-    }
-    stack->items[++stack->top] = indata;
-    printf("thêm %d\taddress: %p\n",stack->items[stack->top],&stack->items[stack->top]);
-    return STACK_OK;
+StackStatus Stack_Push(Stack* stack, int value)
+{
+    if (stack == NULL)
+        return STACK_INVALID_ARG;
+
+    if (Stack_IsFull(stack))
+        return STACK_FULL;
+
+    stack->items[++stack->top] = value;
+    return STACK_HANDLE_OK;
 }
 ```
 ### 2.2.5 Thao tác pop
 ```c
-StackStatus Pop(Stack_datastructure* stack,int* outdata){
-    if(CheckStatus(stack) == STACK_EMPTY){
-        printf("stack rỗng\n");
+StackStatus Stack_Pop(Stack* stack, int* outValue)
+{
+    if (stack == NULL || outValue == NULL)
+        return STACK_INVALID_ARG;
+
+    if (Stack_IsEmpty(stack))
         return STACK_EMPTY;
-    }
-    *outdata = stack->items[stack->top--];
-    return STACK_OK;
+
+    *outValue = stack->items[stack->top--];
+    return STACK_HANDLE_OK;
 }
 ```
 ### 2.2.6 Thao tác top
 ```c
-StackStatus top(const Stack_datastructure* stack,int* topdata){
-    if(CheckStatus(stack) == STACK_EMPTY){
-        printf("stack rỗng\n");
-        *topdata = -1;
+StackStatus Stack_Top(const Stack* stack, int* outValue)
+{
+    if (stack == NULL || outValue == NULL)
+        return STACK_INVALID_ARG;
+
+    if (Stack_IsEmpty(stack))
         return STACK_EMPTY;
+
+    *outValue = stack->items[stack->top];
+    return STACK_HANDLE_OK;
+}
+```
+### 2.2.6 Thao tác free
+```c
+StackStatus Stack_Free(Stack* stack)
+{
+    if (stack == NULL)
+        return STACK_INVALID_ARG;
+
+    if (stack->items != NULL)
+    {
+        free(stack->items);
+        stack->items = NULL;
     }
-    *topdata = stack->items[stack->top];
-    return STACK_OK;
+
+    stack->size = 0;
+    stack->top = -1;
+
+    return STACK_FREE_OK;
 }
 ```
 # 3. So sánh Stack segment và Stack DSA 
