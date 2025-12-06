@@ -1,28 +1,28 @@
 # 1. Tổng quan về Pointer
 ## 1.1 Khái niệm
-- Là 1 loại biến dùng để lưu trữ giá trị là địa chỉ của 1 đối tượng (biến thông thường, con trỏ, hàm, mảng)
+- Biến dùng để lưu trữ giá trị là địa chỉ của 1 đối tượng (biến thông thường, con trỏ, hàm, mảng)
 - Sử dụng khi cần thao truy cập đọc/ghi, thao tác trên nhiều vùng nhớ một cách linh hoạt, nhanh chóng, tối ưu
 
 <p align = "center">
-<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/58b43943-3851-4847-a917-70c7e60703c7" />
+<img width="550" height="350" alt="Image" src="https://github.com/user-attachments/assets/58b43943-3851-4847-a917-70c7e60703c7" />
 
 
 ## 1.2 Bản chất lưu trữ (RAM, Address, giá trị)
 
 <p align = "center">
-<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/531425a3-7514-479d-95eb-6ba981f58b9b" />
+<img width="7550" height="350" alt="Image" src="https://github.com/user-attachments/assets/531425a3-7514-479d-95eb-6ba981f58b9b" />
 
 ### 1.2.1 Địa chỉ và giá trị trong bộ nhớ
 - Biến lưu trên RAM có đặc điểm
   + Lưu trong một vùng nhớ chứa địa chỉ cấp phát liền kề
   + biến int chiếm 4 byte cần 4 ô địa chỉ kế tiếp nhau
-  + Máy tính chỉ làm việc với byte, nên dù bất kỳ kiểu nào (int,float,double), đều được chia nhỏ thành từng byte để lưu= ở 1 giá trị địa chỉ
+  + Máy tính chỉ làm việc với byte, nên dù bất kỳ kiểu nào (int,float,double), đều được chia nhỏ thành từng byte để lưu ở 1 giá trị địa chỉ
   + Giá trị ở dạng decimal được chuyển đổi thành hệ binary hoặc Hex khi lưu trữ (ví dụ : decimal (10) -> 0b1010 hoặc 0x0A)
 
 ### 1.2.2 MSB & LSB
 - Quy định vị trí byte cao/thấp nhất của 1 dữ liệu nhiều byte
-  + MSB : Byte có trọng số cao nhất  (bên trái ngoài cùng)
-  + LSB : Byte có trọng số thấp nhất (bên phải ngoài cùng)
+  + `MSB` : Byte có trọng số cao nhất  (bên trái ngoài cùng)
+  + `LSB` : Byte có trọng số thấp nhất (bên phải ngoài cùng)
   + Ví dụ : int a = 10 thì LSB biểu diễn 0x0A. Tùy theo cách sắp xếp byte trên RAM 0x0A có thể nằm ở low/high address __(Khái niệm về endian)__
 
 ### 1.2.3 Con trỏ luu trên RAM
@@ -36,7 +36,7 @@
 Khái niệm để mô tả thứ tự sắp xếp các byte của 1 dữ liệu nhiều byte ở các vùng địa chỉ được cấp phát trên bộ RAM. Được chia làm 2 loại là big và little endian 
 
 <p align = "center">
-<img width="750" height="550" alt="Image" src="https://github.com/user-attachments/assets/440efc8a-3f00-487a-abd7-5ff8ab67f989" />
+<img width="550" height="350" alt="Image" src="https://github.com/user-attachments/assets/440efc8a-3f00-487a-abd7-5ff8ab67f989" />
 
 `Ví dụ` : kiểm tra kiến trúc máy tính chạy kiểu endian nào dựa trên đoạn code sau 
 
@@ -56,22 +56,23 @@ int main() {
 
 __Lưu ý__ : Ép kiểu con trỏ không thay đổi kiểu dữ liệu của biến ban đầu, nó chỉ thay đổi cách nhìn để truy cập đọc/ghi dữ liệu thông qua con trỏ 
 
-`Tóm tắt `: Kiểu endian phụ thuộc vào kiến trúc CPU và ảnh hưởng đến cách ta thao tác với dữ liệu khi giao tiếp các hệ thống khác nhau như (MCU - Sensor) hay truyền thông mạng (Networking)
+__Tóm tắt__: Kiểu endian phụ thuộc vào kiến trúc CPU và ảnh hưởng đến cách ta thao tác với dữ liệu khi giao tiếp các hệ thống khác nhau như (MCU - Sensor) hay truyền thông mạng (Networking)
 
 ### 1.3.2 Ứng dụng 
 Trong thực tế, Endianess sẽ ảnh hưởng trực tiếp đến cách dữ liệu được truyền giữa các thiết bị có nền tảng CPU khác nhau.
 
 
-**Giao tiếp Sensor - MCU - PC**
+**a) GIAO TIẾP SENSOR - MC - PC**
 
 <p align = "center">
-<img width="650" height="400" alt="Image" src="https://github.com/user-attachments/assets/f7644535-9d44-4351-8d53-2d4723cd3550" />
+<img width="450" height="200" alt="Image" src="https://github.com/user-attachments/assets/f7644535-9d44-4351-8d53-2d4723cd3550" />
 
 Trong hệ thống nhúng, dữ liệu được truyền dựa trên sơ đồ như trên và mỗi thành phần có thể sử dụng các kiến trúc CPU khác nhau. Ví dụ
   + Sensor có thể dùng chip ARM (little endian)
   + PC dùng intel x86 (little endian)
   + Các thiết bị điều khiển / gateway (big endian)
-=> Chihn1 vì vậy nếu bên gửi (big endian) là "12 45 56 78" , thì bên nhận (little endian) có thể đọc ngược thứ tự byte __(nếu không chuyển đổi)__ . Dẫn đến sai dữ liệu nhận về
+
+=> Chính vì vậy nếu bên gửi __(big endian)__ là "12 45 56 78" , thì bên nhận ___(little endian)__ có thể đọc ngược thứ tự byte __(nếu không chuyển đổi)__ . Dẫn đến sai dữ liệu nhận về
 
 ```c
 uint16_t swap_endian(uint16_t val) {
@@ -79,10 +80,10 @@ uint16_t swap_endian(uint16_t val) {
 }
 ```
 
-**Giao tiếp mạng**
+**GIAO TIẾP MẠNGg**
 
 <p align = "center">
-<img width="650" eight="400" alt="Image" src="https://github.com/user-attachments/assets/ce1bc092-957b-41a1-913c-2756940e3ed9" />
+<img width="450" eight="200" alt="Image" src="https://github.com/user-attachments/assets/ce1bc092-957b-41a1-913c-2756940e3ed9" />
 
 
 Trong mạng máy tính (TCP/IP) có đặc điểm
@@ -125,10 +126,10 @@ int main(){
 }
 ```
 
-`Tóm tắt` : kích thước của con trỏ trên PC trên thực tế phụ thuộc vào mô hình biên dịch chứ không chỉ CPU
+__Tóm tắt__ : kích thước của con trỏ trên PC trên thực tế phụ thuộc vào mô hình biên dịch chứ không chỉ CPU
 
-### 1.4.1 Kiểu dữ liệu và Pointer Arithmetic
-- Kiểu dữ liệu quy định 
+### 1.4.2 Kiểu dữ liệu và Pointer Arithmetic
+- Kiểu dữ liệu con trỏ quy định 
   + số lượng byte mà nó được phép truy xuất đọc/ghi
   + Bước nhảy của con trỏ khi thao tác ++/-- 
   + ví dụ : p1 += 3 tương ứng với bước nhảy là 3 đơn vị * sizeof(int)
@@ -162,15 +163,16 @@ int main(){
 }
 ```
 
-## 1.6 Con trỏ và mảng
+## 1.5 Con trỏ và mảng
 
 <p align = "center">
 <img width="400" height="350" alt="Image" src="https://github.com/user-attachments/assets/c6d0ae3b-d2ba-4ded-a74c-8014323ba2f3" />
 
-##3 1.6.1 Bối cảnh
+### 1.4.1 Bối cảnh
 Khi làm việc với dữ liệu lớn ví dụ như buffer chứa nhiều phần tử 
   + giao tiếp buffer trong truyền/nhận UART
   + Mảng ký tự chuỗi
+
 => Cần cơ chế để duyệt qua hay nói cách khác là truy cập đọc/ghi từng phần tử nhanh chóng và hiệu quả, chứ không cần khai báo nhiều biến (tốn memory) đó chính là con trỏ
 
 | Thành phần                        | Vai trò                                    | Lưu ý                                               |
@@ -179,11 +181,11 @@ Khi làm việc với dữ liệu lớn ví dụ như buffer chứa nhiều ph�
 | `int *ptr = arr;`                 | Con trỏ trỏ đến phần tử đầu tiên của `arr` | `ptr` có thể di chuyển (`ptr++`)                    |
 | `arr[i]` tương đương `*(arr + i)` | Truy xuất giá trị tại chỉ số `i`           | Dựa vào **pointer arithmetic**                      |
 
-Lưu ý khi thao tác với con trỏ trên mảng 
+**ý khi thao tác với con trỏ trên mảng**
   + khi truyền tên mảng vào hàm chính là truyền địa chỉ của phần tử đầu mảng
   + dữ liệu trong hàm có thể thay đổi mảng gốc thông qua tham số con trỏ trỏ đến địa chỉ của mảng truyền vào
 
-## 1.6.2 Ứng dụng và ưu điểm 
+## 1.5.2 Ứng dụng và ưu điểm 
 
 | Ứng dụng                   | Giải thích                                                          |
 | -------------------------- | ------------------------------------------------------------------- |
@@ -199,7 +201,7 @@ Lưu ý khi thao tác với con trỏ trên mảng
   + có thể trỏ đến địa chỉ bất kỳ biến nào
   + Nếu muốn truy cập biến đang trỏ tới cần ép về kiểu dữ liệu gốc
   + Ứng dụng thao tác trên nhiều loại dữ liệu khác nhau mà không muốn tạo nhiều con trỏ riêng biệt
-  + (datatype*)ptr : thao tác ép kiểu để biết cần đọc bao nhiêu byte __(vì compiler không biết kích thước dữ liệu gốc)__
+  + `(datatype*)ptr` : thao tác ép kiểu để biết cần đọc bao nhiêu byte __(vì compiler không biết kích thước dữ liệu gốc)__
 
 ```c
 //thay vì làm như sau 
@@ -212,7 +214,7 @@ void* ptr; //thao tác trên bất kỳ biến nào
 ``` 
 
 ### 2.1.2 Các ví dụ
-`Ví dụ` : Truy cập nhiều biến 
+**a) Truy cập nhiều biến** 
 ```c
 void *ptr;
 int a = 10;
@@ -230,7 +232,7 @@ printf("%c\n", *(char*)ptr);   // Ép kiểu sang char*
 
 ```
 
-`Ví dụ` : Truy cập thông qua mảng con trỏ void
+**b) Truy cập thông qua mảng con trỏ void**
 ```c
 int a = 12;
 char b = 's';
@@ -252,7 +254,7 @@ for(int i = 0 ; i < sizeof(str) ; i++){
 }
 ```
 
-`Ví dụ` : Truy cập mảng con trỏ đến các chuỗi ký tự bằng con trỏ void
+**c) Truy cập mảng con trỏ đến các chuỗi ký tự bằng con trỏ void**
 
 ```c
 char* pstr[] = {"hello","world","my name","is Duy"};
@@ -276,16 +278,19 @@ for(int i = 0 ; i < len  ; i++){
 
 ### 2.1.3 Tóm tắt chức năng và ứng dụng thực tế
 
-**Ưu điểm**
+**a) Ưu điểm**
+
 - Tái sử dụng con trỏ cho nhiều kiểu 
 - Tổng quát hóa và rút gọn mã nguồn
 - Đơn giản hóa thiết kế (ví dụ : hàm xử lý đa kiểu dữ liệu - `Generic function`)
-**Nhược điểm**
+
+**b) Nhược điểm**
+
 - Cần ép kiểu thủ công để truy cập đọc/ghi chính xác
 - Không thể áp dụng phép toán tăng/giảm hoặc dereference nếu chưa ép kiểu
 - Gây lỗi nếu ép sai kiểu
 
-**Ứng dụng thực tế**
+**c) Ứng dụng thực tế**
 
 Trong hệ thống nhúng thực tế sử dụng nhiều cấu trúc dữ liệu khác nhau như (Linked list,Stack,Queue) - Tổng quát. Do đó void* giúp lưu trữ đĩa chỉ của mọi loại dữ liệu trong cùng 1 container 
 
@@ -320,7 +325,7 @@ int* ptr = NULL;
 
 ### 2.2.2 Ví dụ minh họa
 
-**Trường hợp truy cập con trỏ chưa khởi tạo**
+**a) Trường hợp truy cập con trỏ chưa khởi tạo**
 - Trong hệ thống nhúng, 
     + nếu thực hiện dereference *ptr , có thể tro MCU hoặc reset watchdog
     + do không có Os bảo vệ mem, lỗi Null pointer có thể gây hỏng dữ liệu toàn bộ hệ thống
@@ -335,7 +340,7 @@ void sensor_read()
 }
 ```
 
-**Gán Null và kiểm tra trước khi dùng**
+**b) Gán Null và kiểm tra trước khi dùng**
 
 ```c
 #include <stdio.h>
@@ -357,7 +362,7 @@ void sensor_read()
 
 ### 2.2.3 Tóm tắt chức năng và ứng dụng thực tế
 
-**Vấn đề - giải pháp**
+**a) Vấn đề - giải pháp**
 - `Uninitialized pointer` 
    + trỏ ngẫu nhiên gây lỗi bộ nhớ 
    + Khắc phục ? gán NULL khi khai báo
@@ -368,7 +373,7 @@ void sensor_read()
  + hỏng dữ liệu -> reset watchdog
  + khắc phục ? luôn khởi tạo và kiểm tra con trỏ hợp lệ 
 
-**Ứng dụng thực tế**
+**b) Ứng dụng thực tế**
 
 - `Driver layer` : khi trỏ tới DMA buffer / hardware reg cần được kiệm tra trước khi truy xuất
 - `RTOS task` : nếu NULL truyền nhầm vào hàm , nên có logic kiểm tra để tránh crash task
@@ -595,4 +600,3 @@ int main(void)
     printf("%s | %s\n", t, h);  // In ra: TEMP=27 | HUM=63
 }
 ```
-
