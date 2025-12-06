@@ -13,8 +13,7 @@ char major[20];
 - Nếu giữ nguyên cách triển khai như trên thì việc quản lý thong tin của nhiều sinh viên sẽ khiến chương trình 
     + Phức tạp, khó quản lý, do nhiều biến rời rạc được tạo ra
     + thao tác truyền/nhận dữ liệu giữa hàm trở nên khó khăn (truyền từng biến)
-
-__Giải pháp tối ưu là gộp tất cả các thông tin trên vào vị trí duy nhất để dễ dàng quản lý bằng cách sử dụng struct keyword__
+__=> Giải pháp tối ưu là gộp tất cả các thông tin trên vào vị trí duy nhất để dễ dàng quản lý bằng cách sử dụng struct keyword__
 
 ## 1.2 Liên hệ thực tế trong hệ thống nhúng 
 - Thông thường cần quản lý nhiều loại dữ liệu, tín hiệu từ các thực thể, đối tượng khác nhau ví dụ 
@@ -28,7 +27,8 @@ __Giải pháp tối ưu là gộp tất cả các thông tin trên vào vị tr
 - Nếu chỉ dùng biến riêng lẻ, thì
     + mã nguồn trở nên rối rắm, khó mở rộng
     + Khó quản ý từng thiết bị độc lập 
-- Chính vì vậy bằng cách dùng struct, ta có thể đóng gói và tổ chức nhiều thông tin riêng lẻ thành các đơn vị dữ liệu tổng quát tương ứng với từng thực thể
+
+__=> Dùng struct, cho phép đóng gói và tổ chức nhiều thông tin riêng lẻ thành các đơn vị dữ liệu tổng quát tương ứng với từng thực thể__
 
 ```c
 typedef struct {
@@ -57,7 +57,7 @@ struct structureName {
     + một struct con,...(hoặc bất kỳ datatype nào khác)
 
 **b) Sử dụng Struct**
-- Khi tạo ra kiểu struct như dưới đây chỉ là 1 template, chưa phải là các biến (chưa được cấp phát địa chỉ thực tế để sử dụng)
+- Khi tạo ra kiểu struct như dưới đây chỉ là 1 template, chưa phải là các biến __(chưa được cấp phát địa chỉ thực tế để sử dụng)__
 ```c
 struct Sensor{
     int time;
@@ -86,35 +86,24 @@ typedef struct {
 // Create Variable
 Sensor_t Data = { .time = 1, .temp = 30.5, .humidity = 40 };
 ```
-`Note:` các kiểu struct được tạo ra nên được thêm đuôi `_t` hoặc `Type` để đánh dấu đây là 1 kiểu dữ liệu (ví dụ thư viên __stdint.h__)
+__Note:__ các kiểu struct được tạo ra nên được thêm đuôi `_t` hoặc `Type` để đánh dấu đây là 1 kiểu dữ liệu (ví dụ thư viên __stdint.h__)
 
-**d) Tag name - tên tham chiếu**
-
-__Ý NGHĨA__
-
-- Khi khai báo 1 struct, ta có thể đặt __tag name__ tức là tên định danh, mà ta có thể dùng lại sau này để tham chiều đến kiểu struct đó.
-
-```c
-struct Student{
-    char name[20];
-    int id;
-}
-```
-Với: 
-    + Student là `tag name`
-    + kiểu struct đầy đủ `struct Student`
-
-- Nếu không có `tag name`, nên để sử dụng được cần thông qua alias  `Student` được tạo bởi typedef 
+**d) Alias - tên định danh**
+- Tên thay thế cho từ khóa struct khi dùng với typedef 
 ```c
 typedef struct {
     char name[30];
     int id;
 } Student;
+
+Student st1;  //không cần gọi lại struct 
 ```
 
-__DÙNG KHI NÀO ?__
+**e) Tag name - tên tham chiếu**
 
-+ Trường hợp trong struct có chứa member trỏ đến chính kiểu của nó - ví dụ linked list
+__Ý NGHĨA__
+
+- Khi khai báo 1 struct, ta khai báo __tag name__ là tham chiếu đến struct đó, khi struct chứa con trỏ đến chính nó
 
 ```c
 struct Node {
@@ -122,9 +111,9 @@ struct Node {
     struct Node *next;
 };
 ```
-+ Struct Node ở trong ? : vì ở dòng khai báo `next` , kiểu `struct Node` chưa hoàn chỉnh, nên cần khai báo con trỏ tới chính nó - chứ không thể khai báo kiểu `Struct Node`
-+ Khi compiler đọc đến dòng đầu -> tạo ra tên định danh là `Node` chưa đầy đủ 
-+ Khi compiler đọc đến dòng (struct Node *next;),  biết rằng có một kiểu tên Node tồn tại, nên cho phép khai báo con trỏ tới kiểu này, dù struct chưa hoàn chỉnh 
+
+- Khi compiler đọc đến dòng đầu, tạo ra tên định danh là Node chưa đầy đủ
+- Khi compiler đọc đến dòng (struct Node *next;), biết rằng có một kiểu tên Node tồn tại, nên cho phép khai báo con trỏ tới kiểu này, dù struct chưa hoàn chỉnh
 
 
 # 2. Bản chất của struct so với biến thông thường 
@@ -167,25 +156,30 @@ int main() {
 
 # 3 Struct Alignment Padding
 ## 3.1 Tối ưu bộ nhớ trong struct 
-Cần biết rằng hệ thống nhúng thường có tài nguyên hạn chế, vì vậy nên việc sắp xếp và thiết kế struct hợp lý là cần thiết để đảm bảo __tăng hiệu suất__ truy xuất của CPU và __tránh lãng phí tài nguyên__ Để làm được điều đó cần hiểu rõ 2 thứ
+Cần biết rằng hệ thống nhúng thường có tài nguyên hạn chế, vì vậy nên việc sắp xếp và thiết kế struct hợp lý là cần thiết để đảm bảo 2 yếu tố
+  + __Tăng hiệu suất__ truy xuất của CPU 
+  + __tránh lãng phí__ tài nguyên 
+
+=> Để kiểm soát được 2 yếu tố trên ta cần hiểu rõ được các khái niệm sau đây
 
  **a) Cách CPU truy xuất memory**
 - CPU không truy xuất từng byte mà thường theo đơn vị truy cập tự nhiên là __natural unit__ 
-- Mỗi vi xử lý có __độ rộng bus__ và __đơn vị truy cập tự nhiên__ (word) khác nhau. Khi truy cập dữ liệu không được căn chỉnh (misaligned access). CPU có thể cần nhiều __memory cycle__ để đọc đủ dữ liệu hoặc sinh lỗi.
+- Mỗi vi xử lý có __độ rộng bus__ khác nhau. Khi truy cập dữ liệu không được căn chỉnh __(misaligned access)__. CPU có thể cần nhiều __memory cycle__ để đọc đủ dữ liệu hoặc sinh lỗi.
 - Do đó, việc sắp xếp dữ liệu sao cho phù hợp với __quy luật truy cập của CPU__ là rất quan trọng.
 
 **b) Cách compiler sắp xếp phần tử trong struct**
-- Compiler tự động chèn các khoảng đệm - padding, nhằm đảm bảo từng phần tử được căn chỉnh đúng theo yêu cầu của CPU.
+- Compiler tự động chèn các khoảng đệm  (__padding__), nhằm đảm bảo từng phần tử được căn chỉnh đúng theo yêu cầu của CPU.
 - Cần hiểu được nguyên lý trên để tránh lãng phí bộ nhớ.
 
 => Tóm lại từ 2 khái niệm trên ta rút ra nguyên tắc khi làm việc với struct ta rút ra nguyên tắc : __Thứ tự và kiểu dữ liệu__ của các phần tử trong struct ảnh hưởng trực tiếp đến bộ nhớ, tốc độ truy cập của CPU
 
 ## 3.2 Các khái niệm liên quan đến cách thức CPU truy xuất bộ nhớ vật lý 
-**Memory access cycle - chu kỳ truy cập bộ nhớ**
+**a) Memory access cycle - chu kỳ truy cập bộ nhớ**
 - Mô tả việc CPU thực hiện truy cập dữ liệu (load/store) trong 1 lần
 - Trên stm32 ví dụ:
     + Mỗi lần load/store CPU sẽ lấy hoặc ghi tối đa 4 byte qua bus dữ liệu
     + Nếu dữ liệu lớn hơn 32-bit ví dụ uint64_t , CPU sẽ cần phải tốn 2 lần truy cập 4 byte 
+
 **b) Bus width - độ rộng đường dữ liệu**
 - Số bit mà CPU có thể truyền/nhận trong 1 chu kỳ bus 
 - Là đơn vị dữ liệu mà CPU truy xuất vật lý (qua đường truyền)
@@ -198,9 +192,9 @@ Cần biết rằng hệ thống nhúng thường có tài nguyên hạn chế, 
 | 32-bit ARM Cortex-M | 32 bit (4 byte) | CPU đọc/ghi 4 byte mỗi lần |
 | 64-bit x86_64       | 64 bit (8 byte) | CPU đọc/ghi 8 byte mỗi lần |
 
-=> Tóm lại Bus width = __độ rông ống nước__ giữa CPU và RAM, Ống cảng to, mỗi lần PU có thể __múc__ được nhiều dữ liệu 
+=> Ta hình dung như sau __Bus width = độ rông ống nước__ giữa CPU và RAM, Ống cảng to, mỗi lần PU có thể __múc__ được nhiều dữ liệu 
 
-**b) Natural Unit - đơn vị dữ liệu tự nhiên**
+**c) Natural Unit - đơn vị dữ liệu tự nhiên**
 - Kích thước dữ liệu cơ bản mà CPU xử lý trong 1 lần thao tác ALU
 - Là đơn vị dữ liệu mà CPU xử lý logic (qua thanh ghi)
 
@@ -293,12 +287,10 @@ typedef struct{
     + giúp giảm thiểu số chu kỳ đọc của CPU khi truy cập struct member
 
 # 4. Các vấn đề khi sắp xếp phần tử theo quy tắc alignment - padding và cách loại bỏ padding 
-## 4.1 Bối cảnh 
-- Việc săp xếp các phần tử như trên sẽ dẫn đến __Tốn bộ nhớ__ mặc dù tốc độ truy cập được tối ưu, nhưng gây phát sinh các byte dư thừa, gây tốn bộ nhớ
-- 
-## 4.2 Khái niệm struct packing 
-- Trong một số trường hợp ta sẽ cần tránh Alignment - padding như kể trên. Chính vì vậy hầu hết các compiler đều hỗ trợ tiện ích để tắt phần padding măc định 
 
+## 4.1 Khái niệm struct packing
+- Việc săp xếp các phần tử như trên sẽ dẫn đến __Tốn bộ nhớ__ mặc dù tốc độ truy cập được tối ưu, nhưng gây phát sinh các byte dư thừa, gây tốn bộ nhớ. Do đó ta sẽ sử dụng kỹ thuật #pragma để khắc phục vấn đề này  
+- Trong một số trường hợp ta sẽ cần tránh Alignment - padding như kể trên. Chính vì vậy hầu hết các compiler đều hỗ trợ tiện ích để tắt phần padding măc định 
 - Các chỉ thiện biên dịch sau đây dùng để kiểm soát việc căn chỉnh và bỏ byte padding trong struct 
 
 **a) Pragma pack**
@@ -319,7 +311,7 @@ struct name {
     ...
 } __attribute__((packed));
 ```
-**b)Trường hợp áp dụng việc loại bỏ padding**
+## 4.2 Trường hợp áp dụng việc loại bỏ padding
 
 `Lưu ý sử dụng thưc tế`
 
@@ -329,7 +321,7 @@ struct name {
 | Hữu ích khi đóng gói dữ liệu gửi/nhận qua UART, CAN, SPI, file nhị phân, v.v. | Một số vi điều khiển (như ARM Cortex-M0) có thể **lỗi bus** nếu truy cập dữ liệu misaligned |
 | Đồng bộ định dạng giữa các hệ thống (ví dụ giữa MCU và PC)                    | Không nên dùng cho dữ liệu xử lý thường xuyên trong CPU                                     |
 
-`Trường hợp ứng dụng`
+## 4.3 Trường hợp ứng dụng
 
 | Trường hợp                                                        | Nên dùng | Không nên dùng |
 | ----------------------------------------------------------------- | -------- | -------------- |
@@ -345,7 +337,7 @@ struct name {
     + tối ưu hiệu suất xử lý
     + đơn giản hóa thao tác với dữ liệu cấp bit 
 
-**Vấn để : quản lý và lưu trữ trạng thái của nhiều đối**
+### 5.1.1 Vấn để quản lý và lưu trữ trạng thái của nhiều đối tượng**
 - Ví dụ ta có hệ thống điều khiển 8 đèn LED, mỗi bóng chỉ cần 1 bit để lưu trạng thái (on/off). Nếu sử dụng char(1 byte) cho từng LED, dẫn đến các vấn đề sau 
 
 __a) Lãng phí RAM__
@@ -438,7 +430,7 @@ __NOTE__ : Đối với vùng nhớ chung lưu trữ các bitfield cùng datatyp
 <p align = "center">
 <img width="850" height="450" alt="Image" src="https://github.com/user-attachments/assets/c2e36d1b-c5ee-4c5f-8e74-05c9d2da9310" />
 
-### 5.3 Tóm tắt ưu và nhược điểm
+### 5.2.3 Tóm tắt ưu và nhược điểm
 
 | **Tiêu chí**                            | **Ưu điểm (Benefits)**                                                                              | **Nhược điểm (Limitations)**                                                                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -450,4 +442,3 @@ __NOTE__ : Đối với vùng nhớ chung lưu trữ các bitfield cùng datatyp
 | **Kiểu dữ liệu**                        | • Cho phép mô tả rõ số bit cần dùng.                                                                | • Nên dùng `unsigned` để tránh rắc rối về bit sign-extend hoặc hành vi không mong muốn.                                                          |
 | **Định nghĩa giao thức/format dữ liệu** | • Thuận lợi mô tả layout logic của payload.                                                         | • Nhưng **không phù hợp để gửi qua mạng/MCU** vì layout phụ thuộc compiler.                                                                      |
 | **Khai báo và quản lý cấu trúc**        | • Tạo khuôn dạng dữ liệu gọn, rõ ý nghĩa.                                                           | • Cần hiểu rõ kiểu của từng phần tử để tránh mismatch giữa machine word và số bit khai báo (sẽ đề cập thêm trong video của bạn).                 |
-
