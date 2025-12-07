@@ -1,80 +1,94 @@
+# Bối cảnh ra đời của Storage class
+<p align = "center">
+<img width="549" height="423" alt="Image" src="https://github.com/user-attachments/assets/80399234-bc18-4bd3-af3c-e0432a28a3ef" />
+
+- Storage class là tập các từ khóa được sử dụng kèm với việc khai báo biến, nhằm quản lý vòng đời, phạm vi sử dụng của biến để đáp ứng các yêu cầu thực tế khi triển khai lập trình C trên hệ thống nhúng thực tế. Bao gồm 
+    + Tối ưu hóa code, bộ nhớ 
+    + Tăng tính module hóa và tái sử dụng code
 # 1. Từ khóa extern 
 
 ## 1.1 Định nghĩa
-được sử dụng để thông báo cho compiler biết 1 biến được gọi và sử dụng trong file hiện tại đã được khai báo ở file khác và không cần phải định nghĩa lại
+- Từ khóa nhắc cho compiler biết 1 biến đã được khai báo rồi và có thể được tái sử dụng và chia sẻ cho nhiều module trong cùng thư mục gốc của dự án mà không cần phải khai báo lại
 ## 1.2 Bản chất
-Từ khòa extern cho phép 1 tài nguyên chung được chia sẻ và sử dụng trong nhiều file của chương trình
 
-+ file lib.c
-```bash
- int a = 34;
+<p align = "center">
+<img width="939" height="524" alt="Image" src="https://github.com/user-attachments/assets/e4c73ecb-1475-4c42-8e8f-d7a3ab7d9eb4" />
+
+- Khi file nguồn chứa khai báo `extern` được biên dịch thành file object nó sẽ chứa 1 tham chiếu __(symbol reference)__ được ký hiệu là __U (Undefined Symbol)__
+```c
+// file driver.c
+int adc_value = 0;   // global symbol: adc_value
+
+// file app.c
+extern int adc_value; // compiler tạo ra symbol kiểu U adc_value
 ```
-+ file main.c
-```bash
-  Extern int a; 
-  int main(){
-    printf("%d",a);
-    return 0;
-  }
+- Khi compile với 
+    + `nm driver.c` sẽ cho
+```c
+00000000 D adc_value
 ```
-## 1.3 Gọi 1 hàm trong file khác
-Đối với việc gọi 1 hàm nào đó, từ 1 file khác thì ta không cần sử dụng từ khóa static mà sử dụng trực tiếp trong file main hiện tại
-+ file output.c
-```bash
- #include<stdio.h>
- int sensor = 34;
- void printdata(int sensor){
-      printf("%d".sensor);
- }
+    + `nm app.c` sẽ cho
+```c
+U adc_value;
 ```
-+ file main.c
-```bash
- #include<stdio.h>
- void printdata(int); // khai báo function prototype 
- extern int sensor;   // gọi biến từ file khác 
- int main(){
-    printdata(sensor); //sử dụng hàm
-    return 0;
- }
+
+- Compiler không thực sự biết biến gốc nằm ở đâu
+- Nhưng nó tin rằng ở 1 file nguồn khác sẽ chứa biến đó 
+- Do đó ở bước linker. Nó sẽ tìm symbol 'adc_value' trong driver.o và nối vào app.o tạo ra 1 symbol là T __(Global symbol in text/data segment)__ . Chính là liên kết tham chiếu hoàn chỉnh.
+
+```c
+T adc_value
 ```
+## 1.3 Extern và function declaration 
+- Đối với hàm, extern là mặc định 
+
+```c
+void foo();        // = extern void foo();
+extern void foo(); // same
+```
+- Tức là mọi function đều có 1 liên kết ra ngoài __(external linkage)__ trừ khi ta dùng static 
+
+```c
+static void foo(); //internal , private 
+```
+
 ## 1.4 So sánh cách cập nhật giá trị thông qua extern,truyền con trỏ, và return
 
-### a) Ngữ cảnh áp dụng extern
+### 1.4.1 Ngữ cảnh áp dụng extern
 
-- chia sẻ dữ liệu giữa nhiều file nguồn cùng chức năng, ví dụ module read dùng để cập nhật ghi dữ liệu cảm biến, và extern cho các module khác
-để đọc và xử lý. Có thể dùng gettter/setter để bảo vệ quyền đọc/ghi trực tiếp tránh việc biến bị thay đổi ngoài mong muốn
-- Phù hợp :
-    => ứng dụng nhỏ, ít chức năng
-    => dũ liệu nhỏ, ít thay đổi
-    => dữ liệu có thể chấp nhận chia sẻ trực tiếp
+- chia sẻ dữ liệu giữa nhiều file nguồn cùng chức năng
+- ví dụ module read 
+    + dùng để cập nhật ghi dữ liệu cảm biến, và extern cho các module khác để đọc và xử lý. 
+    + Có thể dùng gettter/setter để bảo vệ quyền đọc/ghi trực tiếp tránh việc biến bị thay đổi ngoài mong muốn
+- Phù hợp 
+    + ứng dụng nhỏ, ít chức năng
+    + dũ liệu nhỏ, ít thay đổi
+    + dữ liệu có thể chấp nhận chia sẻ trực tiếp
 
 **Ưu điểm**
+
 + đơn giản, dễ code
 + chia sẻ giữa nhiều module dẽ dàng
+
 **Nhược điểm**
+
 + dữ liệu dễ bị ghi đè ngoài ý muốn
 + dễ bị xung đột khi nhiều module thực hiện ghi giá trị
 
-### b) Ngữ cảnh áp dụng truyền con trỏ vào hàm
+### 1.4.2 Ngữ cảnh áp dụng truyền con trỏ vào hàm
 - Cần đọc/ghi dữ liệu gián tiếp trong 1 hệ thống lớn thông qua các API trung gian, mà không cần quan tâm đển quá trình xử lý chi tiết. Phù hợp với các dự án lớn, phân chi các lớp cụ thể. __(yêu cầu tính trừu tượng)__
 - Phù hợp cập nhật dữ liệu dạng struct, kết hợp return trạng thái xử lý kiểu bool
 
-**Ưu điểm**
-+ Không cần hiểu sâu về quy trình xử lý dữ liệu 
+**+ Ưu điểm** : Không cần hiểu sâu về quy trình xử lý dữ liệu 
 
-**Nhược điểm**
-+ Cần xác định param truyền vào hàm để xử lý,
+**+ Nhược điểm** : Cần xác định param truyền vào hàm để xử lý,
 
-### c) Ngữ cảnh áp dụng return giá trị trực tiếp
+### 1.4.3 Ngữ cảnh áp dụng return giá trị trực tiếp
 - Cần xử lý và trả về giá trị đơn giản, đọc lẻ tẻ
 
-**Ưu điểm**
+**+ Ưu điểm** : APi dễ đọc, đọc nhanh trong ứng dụng xử lý theo thời gian thực
 
-+ APi dễ đọc, đọc nhanh trong ứng dụng xử lý theo thời gian thực
-
-**Nhược điểm**
-
-= Không phù hợp cho dữ liệu phúc tạp kiểu struct nhiều field
+**+ Nhược điểm**: Không phù hợp cho dữ liệu phúc tạp kiểu struct nhiều field
 
 `VÍ DỤ PHÂN LOẠI`
 
@@ -90,81 +104,164 @@ Std_ReturnType Sensor_Read(SensorId id, SensorData* out);
 extern const double pi;  // ok
 ```
 
+## 1.5 Áp dụng trong thiết kế Autosar Module  
+- Trong kiến trúc Autosar, chứa nhiều module nhằm tách biệt các phần triển khai riêng biệt để dễ quản lý bao gồm 
+    + Cfg.c / h (chứa cấu hình)
+    + Types.h (Chứa các datatypes được định nghĩa chuẩn Autosar)
+    + Module.c (chứa triển khai logic chức năng cụ thể)
+    + Module.h (Chứa API để sử dụng)
+- Bối cảnh cần chia sẻ thông tin cấu hình cho 1 số module cụ thể ta bắt buộc phải dùng extern. Ví dụ
+
+**AUTOSAR Configuration Structure**
+```c
+// Can_Cfg.h
+extern const Can_ConfigType CanConfigData;
+
+//Can_cfg.c
+const Can_ConfigType CanConfigData = {
+    // danh sách controller
+};
+```
+**Note** : 
+- Nếu không extern các module như CanIf không đọc được cấu hình 
+- Từ khóa const ngăn chặn các module khác truy cập ghi vào vùng dữ liệu chia sẻ này 
+
+## 1.6 Tóm tắt những lỗi sai và lưu ý 
+
+| Lỗi sai                                     | Giải thích         |
+| ------------------------------------------- | ------------------ |
+| Khai báo extern nhưng quên định nghĩa       | lỗi linker         |
+| extern xuất hiện trong file .c nhiều lần    | không tối ưu       |
+| Dùng extern để chia sẻ state trong embedded | gây race condition |
+| Extern biến static                          | không thể đúng     |
+| extern const nhưng lại thay đổi dữ liệu     | undefined behavior |
 
 
-- 
 # 2. Từ khóa static 
-## 2.1 biến static được khai báo local
-1 biến sẽ được cấp phát vùng nhớ tồn tại xuyên suốt thời gian chạy chương trình và có phạm vi sử dụng bên trong 1 hàm
-+ Ta có thể sử dụng biến static để thực hiện cập nhật giá trị của 1 dữ liệu nào đó mỗi khi gọi hàm (vùng nhớ không bị giải phóng khi ra khỏi phạm vi định nghĩa)
-```bash
-#include<stdio.h>
-void update(int count){
-    static int data = 25; 
-    printf("lan %d = %d\n",count,data++);
+- Đặc điểm
+    + `Static Lifetime` : Địa chỉ cố định khi chương trình chạy
+    + `Internal Linkage` : Phạm vi sử dụng cục bộ 
+    + `Preserve State` : Vùng nhớ không bị thu hồi khi thoát khỏi phạm vi 
+## 2.1 Static & Storage Duration (Lifetime)
+- 1 biến khi được khai báo static ở phạm vi local hay global thì lifetime của nó luôn luôn tồn tại xuyên suốt thời gian chương trình chạy. Ví dụ 
+```c
+void counter() {
+    static int count = 0;  // sống suốt runtime
+    count++;
 }
 ```
-+ trong hàm update ta tạo ra 1 biến static với giá trị ban đầu là 25 và in ra giá trị của nó đồng thời tăng lên 1 đơn vị. với tham số count sẽ đếm số lần hàm được gọi thông qua đối số truyền vào trong hàm main
-```bash
-int main(){
-    for(int i = 0 ; i < 5 ; i++){
-         update(i + 1);
-    }
-    return 0;
+
+## 2.2 Static variable & Memory section
+- Static variable sẽ được đặt vào các section tương ứng trong memory layout trước khi được load lên RAM khi chương trình chạy
+
+| Trường hợp                                | Section |
+| ----------------------------------------- | ------- |
+| static có khởi tạo → `static int x = 10;` | `.data` |
+| static không khởi tạo → `static int y;`   | `.bss`  |
+
+- Ta có thể kiểm tra bằng câu lệnh sau đây 
+
+```c
+readelf -S main.o
+nm main.o
+
+//kết quả dự kiến 
+00000000 b y
+00000004 d x
+```
+## 2.3 Các kỹ thuật thiết kế với static 
+### 2.3.1 Preserve state - Static local 
+- Trong 1 số trường hợp, ta cần lưu trữ lại kết quả xử lý nhiều lần trong runtime, và kết quả này chỉ nên giữ trong phạm vi xử lý của 1 hàm cụ thể. - Ví dụ : Lưu trạng thái tín hiệu nhiễu `debounce signal` khi nhấn phím 
+```c
+uint8_t DebounceButton() {
+    static uint8_t stable = 0;
+    static uint8_t last_sample = 0;
+
+    uint8_t sample = ReadPin();
+    if(sample == last_sample) stable++;
+    else stable = 0;
+
+    last_sample = sample;
+
+    return (stable > 5);
 }
 ```
-+ Ở trong hàm main ta dùng 1 vòng lặp for để chạy chương trình với số làn nhất định, và truyền vào đối số i + 1 cho biến số lần in ra hiện tại của hàm update. Thực hiện chạy chương trình ta có kết quả sau
-```bash
-lan 1 = 25
-lan 2 = 26
-lan 3 = 27
-lan 4 = 28
-lan 5 = 29
-```
-## 2.2 biến hoặc hàm static được khai báo global
-điều này cho biết biến hoặc hàm đó chỉ có thể gọi và sử dụng trong file hiện tại mà không thể gọi thông qua các file khác nhằm giới hạn quyền truy cập và đảm bảo biến hoặc hàm đó không thể thay đổi ngoài phạm vi cho phép 
-. Ví dụ ta viết 1 chương trình tính toán 2 phân số như sau
-+ file lib.h
-```bash
-typedef struct{
-    int mauso;
-    int tuso;
-}phanso;
-static phanso nhan2ps(phanso ps_a,phanso ps_b);
-void print(phanso ps_a,phanso ps_b);
-```
-trong file trên ta tạo ra 1 struct để định nghĩa các thành phần của phân số và khai báo các function prototype
-+ file calculation.c 
-```bash
-#include"lib.h"
-#include<stdio.h>
-static phanso nhan2ps(phanso ps_a,phanso ps_b){
-    phanso sum;
-    sum.mauso = ps_a.mauso * ps_b.mauso;
-    sum.tuso = ps_a.tuso * ps_b.tuso;
-    return sum;
+
+**Một số ứng dụng khác trong Embedded**
+- Counter timer cục bộ 
+- ADC Oversampling
+- Bộ lọc debouncing 
+- State machine cục bộ 
+
+### 2.3.2 Internal Linkage - static global 
+- Khi ta khai báo 1 biến / hàm static ở phạm vi __scope file__ Ví dụ:
+```c
+static int adc_buffer[16];  // chỉ driver này nhìn thấy
+static void ADC_Start();     // private function
+
+static void Spi_PrivateHelper() {
+    // xử lý logic thấp, không để lộ ra API
 }
 
-void print(phanso ps_a,phanso ps_b){
-    phanso ketqua = tinhtoan(ps_a,ps_b);
-    printf("%d/%d * %d/%d = %d/%d",
-                            ps_a.mauso,ps_a.tuso,
-                            ps_b.mauso,ps_b.tuso,
-                            ketqua.mauso,ketqua.tuso);
-}
 ```
-trong file trên ta định nghĩa 2 hàm, với 1 hàm dùng để tính toán và 1 hàm để hiển thị kết quả sẽ được gọi trong chương trình chính cùng với các đối số truyèn vào.
-+ file main.c
-```bash
-#include"lib.h"
-int main(){
-    phanso psa = {23,21};
-    phanso psb = {35,27};
-    print(psa,psb);
-    return 0;
-}
+- Biến / hàm staic này sẽ không xuất hiện trong __symbol table global__ 
+    + file khác không thể extern nó 
+    + Tương tự như Encapsulation module trong c++ OOP 
+**Đây là chuẩn kiến trúc thiết kế firmware & AUTOSAR module**
+- Public API : khai báo trong .h
+- Private API : dùng static trong .c 
+- 
+### 2.3.3 Thiết kế Hardware driver 
+- Driver thường được thiết kế theo pattern ví dụ __[Driver_X].c  +  [Driver_X].h__
+    - Trong `Driver_X.c`, các thành phần được khai báo static 
+        + state nội bộ 
+        + buffer 
+        + private function 
+        + peripheral flag
+    - Ví dụ 
+```c
+static uint8_t txBuffer[32];
+static uint8_t rxBuffer[32];
+static volatile uint8_t rxCompleted = 0;
+
+static void UART_StartTx();
 ```
-trong hàm trên ta đã khai báo 2 phân số và truyền vào hàm print để in ra kết quả nhưng không thể gọi tới hàm nhan2ps để xem được cụ thể bên trong
+- Nếu không khai báo static có thể vô tình extern cho các file khác không theo thiết kế pattern truy cập sai 
+
+### 2.3.4 bảo vệ tài nguyên RTOS 
+- Bên trong 1 kernel RTOS có thể phải khai báo static cho các thành phần sau để đảm bảo
+    + giữ an toàn cho state hệ thống không bị tác động bởi các module khác
+    + Không lộ API ra ngoài 
+```c
+static TCB_t tcbArray[MAX_TASK];
+static uint32_t SystemTick;
+```
+
+### 2.3.5 Tối ưu hóa Compiler 
+- từ khóa static còn giúp compiler 
+    - giữ biến trong RAM cố định 
+    - tránh cấp phát trên stakc (MCU có stack RAM ít)
+    - khai báo static const được lưu ở flash giảm RAM 
+### 2.3.6 Thiết kế Lookup table, Calibration Table 
+- Lưu trong flash
+```
+static const uint16_t ADC_LUT[32] = {
+    100, 200, 300, ...
+};
+```
+- Trong Autosar 
+```c
+static const Can_ControllerConfigType ControllerDefaults[2] = {...};
+```
+## 2.4 Các lỗi sai và lưu ý với static 
+
+| Lỗi                                                           | Giải thích                 |
+| ------------------------------------------------------------- | -------------------------- |
+| quên static, biến trở thành global symbol                     | gây xung đột, linker error |
+| dùng static quá nhiều → memory bloat                          | static chiếm RAM cố định   |
+| dùng static để share state giữa ISR/main nhưng thiếu volatile | lỗi logic                  |
+| static trong header file                                      | SAI 100%                   |
+
 # 3. Từ khóa register
 sử dụng khi ta muốn lưu trữ 1 biến nào đó trong thanh ghi của CPU thay vì trên RAM, mục đích là để tăng tốc độ tính toán xử lý. 
 ```bash
@@ -202,18 +299,26 @@ hàm trên sẽ đo thời gian thực thi của vòng lặp đối với biến
 + __Đa luồng:__ biến được truy cập hoặc thay đổi bời 1 luòng khác
 
 ## 4.2 Bản chất
-Từ khóa volatile đảm bảo rằng mỗi lần truy cập, giá trị mới nhất của biến được lấy trực tiếp từ RAM, thay vì dùng giá trị lưu trên thahh ghi
+- Từ khóa volatile đảm bảo rằng mỗi lần truy cập, giá trị mới nhất của biến được lấy trực tiếp từ RAM, thay vì dùng giá trị lưu trên thahh ghi. Tóm lại volatile làm 2 việc sau
+- **1. Ngăn compiler cache giá trị biến trong thanh ghi**
+    + Compiler không được phép 
+        - Lưu biến vào register và không đọc lại 
+        - Bỏ qua các lệnh đọc/ghi không cần thiết 
+        - Gộp các lần đọc liên tiếp 
+        - Xóa vòng lặp rỗng 
+- **2. Buộc Compiler luôn đọc / ghi giá trị từ bộ nhớ thật 
+    + Đảm bảo rằng CPU luôn thấy giá trị cập nhật mới nhất 
 ## 4.3 Tối ưu hóa chương trình là gì ? cách ngăn chặn ?
 ### a) Định Nghĩa
-Đó là cơ chế giảm tải hoạt động cho chương trình khi nó giả định 1 biến sẽ không thay đổi giá trị trừ khi nó được sửa đổi bởi logic trong chương trình chính. Nếu compiler thấy biến không thay đổi trong logic của chương trình, nó có thể
-Bỏ qua việc đọc giá trị biến từ bộ nhớ chính. 
+- Cơ chế giảm tải hoạt động cho chương trình khi nó giả định 1 biến sẽ không thay đổi giá trị trừ khi nó được sửa đổi bởi logic trong chương trình chính.
+- Nếu compiler thấy biến không thay đổi trong logic của chương trình, nó có thể bỏ qua việc đọc giá trị biến từ bộ nhớ chính. 
 ### b) Tác động của volatile
 Khi từ khóa này được khai báo , nó sẽ báo cho compiler biết rằng giá trị cũa biến có thể thay đổi bất kỳ luc nào và yêu cầu
 + __không tối ưu hóa:__ Bắt buốc đọc lại giá trị biến từ bộ nhớ chính
 
 + __Luôn đọc giá trị trực tiếp từ bộ nhớ chính:__ compiler phải đọc giá trị mới nhất từ bộ nhớ thay vì dùng giá trị đã lưu trong thanh ghi
 
-## 4.3 Ưng dụng cụ thể
+## 4.3 Ứng dụng xử lý tín hiệu nút nhấn 
 
 Giả sử ta có 1 hệ thống nhúng điều khiển bởi 1 nút nhấn được cấu hình ngắt ngoài. Mỗi khi nhấn nút, thì sẽ có tín hiệu ngắt phát biến bởi vi điều khiển, và 1 biến trạng thái sẽ được dùng để lưu sự kiện ngắt này. Trong chương trình chính sẽ xử lý những công việc dựa trên giá trĩ của biến này.
 
@@ -253,15 +358,42 @@ int main() {
     return 0;
 }
 ```
-__LƯU Ýl__ lý do phải thêm volatile khi khai báo biến i trong vòng lặp for là vì 
+__LƯU Ý__ lý do phải thêm volatile khi khai báo biến i trong vòng lặp for là vì 
 
 + Nếu không có volatile: compiler sẽ nhận ra rằng vòng for chỉ chạy 1 số lần nhất định và không làm gì bên trong vòng lặp, do đó nó có thể loại bỏ for
 + Nếu có volatile: compiler sẽ bị buộc phải luôn luôn thực hiện thực thi for. Volatile sẽ yêu cầu compiler đọc.ghi giá trị của i từ RAM trong mỗi lần lặp
 
-# 5. So sánh các từ khóa
+## 4.4 Một số ứng dụng khác 
+### 4.4.1 Shared variable giữa ISR và main 
+```c
+volatile uint8_t g_flag = 0;
 
-<p align = "center">
-<img src = "https://github.com/user-attachments/assets/e86cb852-f651-4850-ad37-20508a36e83d" width = "1200" height = "230">
+void EXTI_IRQHandler(void) {
+    g_flag = 1;
+}
+
+int main() {
+    while (!g_flag) { } // phải volatile
+}
+
+```
+Nếu không có volatile, compiler sẽ optimize. Dẫn đến ứng dụng bị treo 
+```c
+while(1) { }   // vì nghĩ rằng g_flag “không bao giờ thay đổi”
+```
+
+### 4.4.2 Đoc thanh ghi thiết bị ngoại vi
+- Đối với các tín hiệu đến từ phần cứng không kiểm soát bởi chương trình, ta cần khai báo là volatile để bảo vệ vùng dữ liệu đọc về 
+```c
+#define UART_SR   (*(volatile uint32_t*)0x40011000)
+```
+- Nếu không volatile, 
+    + compiler đọc 1 lần 
+    + lưu vào register 
+    + Những lân sau dùng lại giá trị cũ 
+
+=> driver hoạt động sai
+# 5. So sánh các từ khóa
 
 
 
