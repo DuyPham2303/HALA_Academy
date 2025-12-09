@@ -64,7 +64,7 @@ char* read_json_file(const char* filename) {
    
     //Copy dữ liệu từ file vào buffer 
     fread(buffer,1, length, file);
-    buffer[length] = '\0'; // Kết thúc chuỗi
+    buffer[length + 1] = '\0'; // Kết thúc chuỗi
 
     //thao tác đóng file an toàn 
     fclose(file);
