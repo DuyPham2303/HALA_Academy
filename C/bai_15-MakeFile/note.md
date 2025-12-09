@@ -1,7 +1,6 @@
 # 1. Các biến và rule trong makefile  
 ## 1.1 Biến tự động (Automatic Variables)
-
--   \*\*\$@*\*: Tên target hiện tại.
+-   **\$\@**: Tên target hiện tại.
 -   **\$\<**: Prerequisite đầu tiên (thường dùng cho quy tắc compile
     `.c → .o`).
 -   **\$\^**: Danh sách tất cả prerequisites (loại trừ trùng lặp).
