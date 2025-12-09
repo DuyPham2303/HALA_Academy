@@ -33,38 +33,38 @@
 <p align = "center">
 <img src = "https://github.com/user-attachments/assets/71fc9574-93e0-4cf0-a661-1d776b60a516" width = "500" height = "400">
 
-## 1. Code segment
-## 1.1 Bản chất 
+# 2. Triển khai các segment trên RAM
+## 2.1 Code segment
+### 2.1.1 Bản chất 
 - Đây là nơi chứa mã nguồn thực thi của chương trình
 - Dữ liệu chỉ được đọc và thực thi, mà không được phép ghi (thay đổi)
 - chứa các section cụ thể như
-  	`.text` : chứa mã lệnh
-  	`.rdata`: chứa chuỗi hằng (string literal), các biến (const)
-## 1.2 Ví dụ 
-
-### a) char* str = "hello";
+  	+ `.text` : chứa mã lệnh
+  	+ `.rdata`: chứa chuỗi hằng (string literal), các biến (const)
+### 2.1.2 Ví dụ 
+**a) char* str = "hello"**
 + "hello" là chuỗi hằng , đặt vào .rdata (read-only data section)
 + str được lưu tùy vào vị trí khai báo
   	+ global (toàn cục) : đặt trong .dara (hoặc .rdata tùy compiler)
   	+ local  (cục bộ)   : đặt trong stack  
-### b) const char* str1 = "hello";
+**b) const char* str1 = "hello"**
 + "hello" vẫn là chuỗi hằng trong .rdata
 + str1 là __pointer to const__ , nhưng bản thân nó vẫn trỏ tới địa chỉ khác được nên nằm trong .data 
 
-### c) char str2[] = "hello"
+**c) char str2[] = "hello"**
 + mảng str2[] được khởi tạo bằng chuỗi hằng => compiler copy chuỗi vào .data
 + Vì là mảng, nó không trỏ vào vùng dữ liệu hằng - literal, dữ liệu đã được copy
 
-### d) const char str3[] = "hello";
+**d) const char str3[] = "hello"**
 + mảng nhưng là const => compiler đặt nó vào .rdata
 + str3 nằm trong .rdata
 
-### e) char* str4[] = {"hello", "my name", "is duy"};
+**e) char* str4[] = {"hello", "my name", "is duy"}**
 + str4[] là mảng con trỏ nằm trong .data
 + mỗi chuỗi nằm trong .rdata 
 
-## 2. DATA segment 
-### 2.1 Initialized data 
+## 2.2 DATA segment 
+### 2.2.1 Initialized data 
 + Lưu trữ biến global khởi tạo khác 0
 + Lưu trữ biến static (local + global) cũng khởi tạo khác 0
 + Quyền truy cập đọc/ghi
@@ -78,17 +78,8 @@ static int b = 21;
      return 0;
   }
 ```
-__Lưu ý với struct__
 
-Khi ta khởi tạo 1 struct với các biến thành viên, khi chạy chương trình thì những biến này vẫn chưa được cấp phát vùng nhớ cho đến khi ta tạo ra biến struct 
-```bash
-typedef struct{
-  int a;  
-  int b;
-}data;
-static data dt = {23,12}; // 2 member a và b của struct data lúc này mới được cấp phát vùng nhớ ở data segment
-```
-### 2.2 Uninitialized data - BSS  
+### 2.2.2 Uninitialized data - BSS  
 + Lưu trữ biến global chưa khởi tạo hoặc bằng 0
 + Lưu trữ biến static (local + global) chưa khởi tạo hoằc bằng 0
 + Quyền truy cập đọc/ghi
@@ -105,7 +96,8 @@ static data dt = {23,12}; // 2 member a và b của struct data lúc này mới 
  }
 ```
 
-## 3. STACK
+## 2.3 STACK
+### 2.3.1 Bản chất 
 + Vùng nhớ được cấp phát tại thời điểm biên dịch và được giải phóng khi ra khỏi phạm vi được cấp phát. Dùng lưu trữ 
 	+ các biến khai báo cục bộ (local)
 	+ tham số hàm 
@@ -128,7 +120,7 @@ static data dt = {23,12}; // 2 member a và b của struct data lúc này mới 
 + Khi hàm swap được gọi, địa chỉ của nó sẽ được đẩy lên stack, và các giá trị copy của tham số truyền vào cũng như các biến cục bộ bên trong swap sẽ được cấp phát vùng nhớ riêng biệt
 + Chính vì vậy quá trình tính toán xử lý bên trong swap sẽ không ảnh hưởng đến giá trị bên ngoài phạm vi của nó
 
-### Stack trỏ đến code segment
+### 2.3.2 Stack trỏ đến code segment
 Khi ta khai báo như sau 
 ```bash
   int main(){
@@ -140,7 +132,7 @@ Khi ta khai báo như sau
 ```
 + con trỏ str sẽ được lưu trên stack
 + chuỗi "hello world" mà str trỏ đến sẽ được lưu ở code segment
-### So sánh 1 biến const khi khai báo local vs global
+### 2.3.3 Thay đổi local const thông qua con trỏ 
 
 khi ta khai báo 1 biến const ở phạm vi local, nó sẽ được lưu trên stack và không thể thay đổi được giá trị. Tuy nhiên dùng 1 con trỏ để truy cập vào địa chỉ của nó thì vẫn thay đổi được
 
@@ -157,12 +149,14 @@ khi ta khai báo 1 biến const ở phạm vi local, nó sẽ được lưu trê
 ```
 + Việc chỉnh sửa giá trị của 1 biến const cục bộ thông qua con trỏ sẽ khiến compiler đưa ra cảnh báo nhưng vẫn thực hiện được
 + Đối với biến const toàn cục, thì ta không thể thay đổi giá trị của nó như làm với biến local. 
-## 5. HEAP
+## 2.4. HEAP
+### 2.4.1 Bản chất
 + Vùng nhớ cấp phát tại thời điểm run-time 
 + Kích thước thay đổi được trong khi chương trình chạy 
 + được quản lý bởi người dùng thông qua các từ khóa malloc, calloc,realloc, free (sử dụng thư viện stdlib.h)
 + vùng nhớ được giải phóng bằng cách sử dụng từ khóa free
 
+### 2.4.2 Sử dụng 
 Ví dụ ta có chương trình sau để cấp phát vùng nhớ heap ở thời điểm chương trình đang chạy.
 ```bash
  #include <stdio.h>
@@ -228,95 +222,10 @@ Khi ta chạy chương trình trên, sẽ yêu cầu ta nhập vào số lượn
   //giải phóng vùng nhớ sau khi sử dụng để tránh lỗi memory leak
   free(ptr);
 ```
-### So sánh malloc, calloc, realloc
-CÚ PHÁP KHAI BÁO
-### malloc 
-```bash
-(void*)malloc(size_t size)
-```
-+ Chức năng để cấp phát vùng nhớ trên heap
-+ size: kích thước hoặc số lượng phần tử 
-+ hàm trên sẽ trả về 1 con trỏ tới vùng nhớ vừa cáp phát trên heap có kiểu void*
-### calloc
-```bash
-(void*)malloc(size_t count,size_t size)
-```
-+ Chức năng để cấp phát vùng nhớ trên heap
-+ count: kích thước hoặc số lượng phần tử 
-+ size: kích thước của 1 phần tử
-### realloc 
-```bash
-(void*)realloc(void* ptr,size_t size) 
-```
-+ Chức năng để điều chỉnh kích thước trên heap
-+ ptr: Con trỏ  tới vùng nhớ đã cấp phát trước đó
-+ size: kích thước của 1 phần tử
-SỬ DỤNG
-+ cả 2 hàm calloc và malloc đều có cách khởi tạo giá trị giống nhau
-```bash
-For(int i = 0 ; i < size ; i++){
-    ptr[i] = i + 3; //truy cập các ô địa chỉ trên heap thông qua chỉ số i và ghi vào dữ liệu 
-}
-```
-+ Hàm realloc sẽ được sử dụng để điều chỉnh kính thước của vùng nhớ đã được cấp phát trước đó, và sẽ quyết định giữ lại data của vùng nhớ cũ hay không tùy thuộc vào nhu cầu
-+ Ví dụ ta có chương trình sau để tăng kích thước của vùng nhớ heap đã được cấp phát trước đó như sau.
-```bash
-//khai báo 1 con trỏ để quản lý vùng nhớ heap được cấp phát 
-  int* ptr = (int*)calloc(size,sizeof(int));
 
-  //kiểm tra vùng nhớ được cấp phát thành công hay chưa
-  if(ptr == NULL){
-    printf("cap phat vung nho that bai");
-    return 0;
-  }
-  //gán giá trị cho mỗi phần tử của vùng nhớ
-  for(int i = 0 ; i < size ; i++){
-      ptr[i] = i + 3;
-  }
-  printf("\n");
-
-  //in ra giá trị vừa nhập
-  for(int i = 0 ; i < size ; i++){
-    printf("output %d:%d\n",i,ptr[i]);
-  }
-  //khởi tạo 1 biến lưu kích thước mới
-  int new_size = size + 3;
-  
-  printf("\n new heap\n");
-  ptr = (int*)realloc(ptr,new_size * sizeof(int));
-
-  //gán giá trị cho phần kích thước vừa được thêm vào
-  for(int i = size ; i < new_size ; i++){
-    ptr[i] = i + 3;
-  }
-   for(int i = 0 ; i < new_size ; i++){
-    printf("output %d:%d\n",i,ptr[i]);
-  }
-  //giải phóng vùng nhớ sau khi sử dụng
-  free(ptr);
-  return 0;
-```
-+ Chạy chương trình trên ta được kết quả như sau
-```bash
-output 0:3
-output 1:4
-output 2:5
-output 3:6
-output 4:7
-
- new heap
-output 0:3
-output 1:4
-output 2:5
-output 3:6
-output 4:7
-output 5:8
-output 6:9
-output 7:10
-```
-### Phân biệt STACK và HEAP
+# 3. Phân biệt STACK và HEAP
 ![Capture](https://github.com/user-attachments/assets/b729ce20-051e-48f9-987c-e21d43eb7002)
-### a) Khai báo các biến trên STACK để đọc dữ liệu thông qua cảm biến dht11 và đưa ra cảnh báo
+## 3.1 Khai báo các biến trên STACK để đọc dữ liệu thông qua cảm biến dht11 và đưa ra cảnh báo
 
 ```bash
 typedef struct{
@@ -350,7 +259,7 @@ int main(){
   return 0;
 }
 ```
-### b) Sử dụng HEAP để đọc về 1 buffer trên server online nào đó và thực hiện hành đông cụ thể
+## 3.2 Sử dụng HEAP để đọc về 1 buffer trên server online nào đó và thực hiện hành đông cụ thể
 Ta sẽ có 1 hàm để thực hiện việc đọc 1 buffer nào đó và trả về con trỏ tới vùng nhớ được cấp phát trên heap để lưu trữ chuỗi đọc về
 
 ```bash
