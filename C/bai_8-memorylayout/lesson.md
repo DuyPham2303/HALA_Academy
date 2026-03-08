@@ -42,24 +42,25 @@
   	+ `.text` : chứa mã lệnh
   	+ `.rdata`: chứa chuỗi hằng (string literal), các biến (const)
 ### 2.1.2 Ví dụ 
-**a) char* str = "hello"**
+__a) char* str = "hello"__
 + "hello" là chuỗi hằng , đặt vào .rdata (read-only data section)
 + str được lưu tùy vào vị trí khai báo
-  	+ global (toàn cục) : đặt trong .dara (hoặc .rdata tùy compiler)
-  	+ local  (cục bộ)   : đặt trong stack  
-**b) const char* str1 = "hello"**
+  	+ global (toàn cục) : đặt trong .data (hoặc .rdata tùy compiler)
+  	+ local  (cục bộ)   : đặt trong stack
+  	    
+__b) const char* str1 = "hello"__
 + "hello" vẫn là chuỗi hằng trong .rdata
 + str1 là __pointer to const__ , nhưng bản thân nó vẫn trỏ tới địa chỉ khác được nên nằm trong .data 
 
-**c) char str2[] = "hello"**
+__c) char str2[] = "hello"__
 + mảng str2[] được khởi tạo bằng chuỗi hằng => compiler copy chuỗi vào .data
 + Vì là mảng, nó không trỏ vào vùng dữ liệu hằng - literal, dữ liệu đã được copy
 
-**d) const char str3[] = "hello"**
+__d) const char str3[] = "hello"__
 + mảng nhưng là const => compiler đặt nó vào .rdata
 + str3 nằm trong .rdata
 
-**e) char* str4[] = {"hello", "my name", "is duy"}**
+__e) char* str4[] = {"hello", "my name", "is duy"}__
 + str4[] là mảng con trỏ nằm trong .data
 + mỗi chuỗi nằm trong .rdata 
 
