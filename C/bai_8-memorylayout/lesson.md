@@ -33,6 +33,7 @@
 <p align = "center">
 <img src = "https://github.com/user-attachments/assets/71fc9574-93e0-4cf0-a661-1d776b60a516" width = "500" height = "400">
 
+
 # 2. Triển khai các segment trên RAM
 ## 2.1 Code segment
 ### 2.1.1 Bản chất 
@@ -40,7 +41,8 @@
 - Dữ liệu chỉ được đọc và thực thi, mà không được phép ghi (thay đổi)
 - chứa các section cụ thể như
   	+ `.text` : chứa mã lệnh
-  	+ `.rdata`: chứa chuỗi hằng (string literal), các biến (const)
+  	+ `.rdata` trên Window: chứa chuỗi hằng (string literal), các biến (const)
+  	+ `.rodata` trên GCC / embedded toolchain : tương tự .rdata
 ### 2.1.2 Ví dụ 
 __a) char* str = "hello"__
 + "hello" là chuỗi hằng , đặt vào .rdata (read-only data section)
@@ -99,7 +101,9 @@ static int b = 21;
 
 ## 2.3 STACK
 ### 2.3.1 Bản chất 
-+ Vùng nhớ được cấp phát tại thời điểm biên dịch và được giải phóng khi ra khỏi phạm vi được cấp phát. Dùng lưu trữ 
++ Kích thước được xác định ở bước linker
++ Cấp phát khi runtime thông qua Stack Pointer 
++ Dùng lưu trữ 
 	+ các biến khai báo cục bộ (local)
 	+ tham số hàm 
 	+ địa chỉ trả về của hàm 
@@ -148,7 +152,7 @@ khi ta khai báo 1 biến const ở phạm vi local, nó sẽ được lưu trê
  *p = 15; //wrong -> can't modify value
  }
 ```
-+ Việc chỉnh sửa giá trị của 1 biến const cục bộ thông qua con trỏ sẽ khiến compiler đưa ra cảnh báo nhưng vẫn thực hiện được
++ Việc chỉnh sửa giá trị của 1 biến const cục bộ thông qua con trỏ sẽ khiến compiler đưa ra cảnh báo nhưng vẫn thực hiện được, nhưng có thể khiến compiler bị crash.
 + Đối với biến const toàn cục, thì ta không thể thay đổi giá trị của nó như làm với biến local. 
 ## 2.4. HEAP
 ### 2.4.1 Bản chất
