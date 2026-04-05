@@ -600,3 +600,50 @@ int main(void)
     printf("%s | %s\n", t, h);  // In ra: TEMP=27 | HUM=63
 }
 ```
+## 2.8 Lưu ý khi làm việc với con trỏ 
+
+**a) Lỗi hành vi không xác định là gì**
+- Đây là lỗi liên quan tới việc xử lý các logic có thể gây ra các hành vi không xác định được và không an toàn, gây nguy hiểm đến bộ nhớ khi làm việc trên hệ thống thực tế. Khiến chương trình có thể bị crash và shutdown ngoài ý muốn, Đặc biệt là khi ta làm việc với con trỏ. 
+**b) Usecase cụ thể**
+
+```c
+int n = 5;
+int* p = malloc(n * sizeof(int);
+if(p == NULL) return 0;
+
+/*cho phép sử dụng*/
+
+free(p);
+int a = *p; // truy xuất giá trị con trỏ sau khi đã thu hồi địa chỉ 
+```
+- Con trỏ treo __(dangling pointer)__ là trạng tháicon trỏ không trỏ vào địa chỉ cụ thể nào sau khi ta thu hồi qua hàm free. Lúc này khi thực hiện truy xuất giá trị có thể trả về 1 giá trị không xác định, hoặc khi thao tác ghi giá trị __(use after )__ lên nó có thể bị lỗi truy cập vùng nhớ bất hợp lệ
+- 
+=> Trong hệ thống thực tế có thể khiến chương trình hoạt động sai do memory của các vùng nhớ bị thay đổi ngoài ý muốn
+
+```c
+int n = 5;
+int *p = malloc(n * sizeof(int));
+
+if(p == NULL) return 0;
+
+p[7] = 21; //Truy cập ngoài phạm vi địa chỉ hợp lệ
+```
+- Lỗi __Out-of-bound pointer arithmetic__ xảy ra khi truy cập phần tử của mảng với chỉ số truy cập có bước nhảy địa chỉ vượt quá số lượng byte mà mảng được cấp phát. Do đó ta có thể vô tình truy cập vào các vùng địa chỉ ngoài phạm vi cấp phát hoặc ghi đè lên các biến được cấp phát ngay sau mảng hiện tại
+
+=> Khiến cho các vùng nhớ trong chương trình bị thay đổi ngoài ý muốn, làm chương trình hoạt động sai hoặc thậm chí bị crash nếu vô tình ghi vào read-only region. 
+
+**c) Cách khắc phục**
+
+```c
+// Best practice
+free(p);
+p = NULL;
+
+// Prevent double free
+if(p != NULL){
+    free(p);
+    p = NULL;
+}
+```
+- 
+
