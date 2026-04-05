@@ -442,3 +442,10 @@ __NOTE__ : Đối với vùng nhớ chung lưu trữ các bitfield cùng datatyp
 | **Kiểu dữ liệu**                        | • Cho phép mô tả rõ số bit cần dùng.                                                                | • Nên dùng `unsigned` để tránh rắc rối về bit sign-extend hoặc hành vi không mong muốn.                                                          |
 | **Định nghĩa giao thức/format dữ liệu** | • Thuận lợi mô tả layout logic của payload.                                                         | • Nhưng **không phù hợp để gửi qua mạng/MCU** vì layout phụ thuộc compiler.                                                                      |
 | **Khai báo và quản lý cấu trúc**        | • Tạo khuôn dạng dữ liệu gọn, rõ ý nghĩa.                                                           | • Cần hiểu rõ kiểu của từng phần tử để tránh mismatch giữa machine word và số bit khai báo (sẽ đề cập thêm trong video của bạn).                 |
+
+# 6. Lưu ý khi làm việc với struct 
+## 6.1 Phân loại 1 số lưu ý 
+### 6.1.2 Struct nằm ở đâu trong memory ?
+### 6.2.3 Deep copy vs Shallow copy
+### 6.2.4 Thao tác struct & function 
+### 6.2.5 Compiler dependency & struct layout 
