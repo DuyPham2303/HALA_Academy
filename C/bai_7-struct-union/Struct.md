@@ -446,6 +446,53 @@ __NOTE__ : Đối với vùng nhớ chung lưu trữ các bitfield cùng datatyp
 # 6. Lưu ý khi làm việc với struct 
 ## 6.1 Phân loại 1 số lưu ý 
 ### 6.1.2 Struct nằm ở đâu trong memory ?
+- Khai báo struct datatype luôn bắt buộc là toàn cục
+- Đối với các biến kiểu struct thì ta có thể khai báo chúng nằm ở bất kỳ đâu trong memory
+```c
+typedef struct info{
+    int a;
+    int b;
+}info;
+
+info info_global; //static allocation
+
+int main(){
+    info info_local; //stack allocation
+
+    info* pinfo = malloc(sizeof(info)); //con trỏ kiểu info (stack) trỏ tới heap
+}
+```
 ### 6.2.3 Deep copy vs Shallow copy
-### 6.2.4 Thao tác struct & function 
-### 6.2.5 Compiler dependency & struct layout 
+- Thông thường khi cần copy dũ liệu của struct đặc biệt chứa member là pointer thì ta cần lưu ý như sau
+```c
+typdef struct packet{
+    char* name;
+    int value;
+}
+void create_sensor(packet* dt,int val,const char* name){
+    dt->value = val;
+    dt->name = malloc(strlen(name) + 1);
+    strncpy(dt,name,strlen(name));
+}
+int main(){
+    packet data1,data2;
+    create_sensor(&data1,21,"temperature sensor");
+
+    //shallow copy
+    /*
+        data2.value = data1.value; //ok
+        data2.name = data1.name    //chỉ copy con trỏ -> cùng trỏ tới 1 địa chi chứ không copy dữ liệu thực 
+    */
+    data2 = data1;
+    free(data1.name);    //data2.name sẽ bị free luôn do cùng trỏ tới 1 địa chỉ
+    free(data2.name);    //double free error
+
+    //deep copy
+    /*
+        member name của data1 và data2 thực chất sẽ lưu trữ dữ liệu độc lập (các byte ký tự liên tiếp là bản sao của chuỗi literal) 
+        - khi thao tác trên con trỏ name của data1 sẽ không ảnh hưởng gì data2 và ngược lại
+    */
+    data2.name = malloc(strlen(data1.name) + 1);
+    strcpy(data2.name,data1.name);
+}
+```
