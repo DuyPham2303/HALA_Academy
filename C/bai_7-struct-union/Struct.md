@@ -300,6 +300,8 @@ typedef struct{
 
 ```c
 #pragma pack(n)
+...
+#pragma pop
 ```
 
 vÍ dụ : n = 1 thì các struct được khai báo sẽ chỉ căn chỉnh theo từng byte - không có padding 
