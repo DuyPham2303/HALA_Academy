@@ -495,6 +495,6 @@ int main(){
         - khi thao tác trên con trỏ name của data1 sẽ không ảnh hưởng gì data2 và ngược lại
     */
     data2.name = malloc(strlen(data1.name) + 1);
-    strcpy(data2.name,data1.name);
+    memcpy(data2.name,data1.name);
 }
 ```
